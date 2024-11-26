@@ -1,3 +1,6 @@
+// services 디렉토리의 TechStackService import
+import { TechStackService } from '../services/TechStackService.js';
+
 export class TechStackSearch {
     constructor() {
         this.techStacks = [];
@@ -5,20 +8,24 @@ export class TechStackSearch {
         this.searchInput = document.querySelector('.search-box');
         this.searchResults = document.querySelector('.search-results');
         this.selectedGrid = document.querySelector('.selected-grid');
+        this.techStackService = new TechStackService();
         
         this.init();
     }
 
     async init() {
         try {
-            const response = await fetch('/api/tech-stacks');
-            this.techStacks = await response.json();
+            console.log('Fetching tech stacks...');
+            this.techStacks = await this.techStackService.getTechStacks();
+            console.log('Fetched tech stacks:', this.techStacks);
+            this.setupEventListeners();
         } catch (error) {
-            console.warn('API 연결 실패, 목업 데이터를 사용합니다:', error);
-            const { mockTechStacks } = await import('../../data/mockData.js');
+            console.error('Failed to initialize tech stacks:', error);
+            // mockData 사용
+            const { mockTechStacks } = await import('../data/mockData.js');
             this.techStacks = mockTechStacks;
+            this.setupEventListeners();
         }
-        this.setupEventListeners();
     }
 
     setupEventListeners() {

@@ -1,4 +1,4 @@
-import { mockTechStacks } from '../../data/mockData.js';
+import { mockTechStacks } from '../data/mockData.js';
 
 export class FloatingIcons {
     constructor() {
