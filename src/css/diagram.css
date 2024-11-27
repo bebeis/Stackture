@@ -94,11 +94,19 @@
     padding: 4px;
     min-width: 100px;
     min-height: 24px;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     font-size: 16px;
     resize: both;
     overflow: hidden;
     z-index: 1000;
+    outline: none;
+    caret-color: #2196f3;
+    animation: blink-caret 1s infinite;
+  }
+  
+  @keyframes blink-caret {
+    from, to { caret-color: transparent }
+    50% { caret-color: #2196f3 }
   }
   
   .bottom-bar {
