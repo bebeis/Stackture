@@ -1,4 +1,4 @@
-// services 디렉토리의 TechStackService import
+// src/js/components/TechStackSearch.js
 import { TechStackService } from '../services/TechStackService.js';
 
 export class TechStackSearch {
