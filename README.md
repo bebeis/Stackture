@@ -1,7 +1,19 @@
 # Stackture
+프로젝트 진행 단계 : 그리기 기능 구현 중
 
-Api-server : https://github.com/DawnGlow/stackture-api
-<br>
-Image CDN : AWS S3(준비중)
-<br>
+## 프로젝트 개요
+ **Stackture**는 Architecture Diagram을 그리는데 특화된 웹 사이트입니다. 개발자가 어떤 프로젝트를 계획하고 개발할 때 어떤 기술 스택을 사용할 것인지 고민을 하고 서버 등의 구조를 설계하게 됩니다. 이 과정에서 아키텍처 다이어그램으로 시스템 아키텍처를 표현합니다. 저는 **아키텍처 다이어그램을 그리는데 특화된 웹 사이트**가 있으면 좋겠다는 생각을 했고, 개발자들이 아키텍처 다이어그램을 편리하게 그릴 수 있는 웹 사이트를 제공하는 것을 목표로 프로젝트를 진행하게 되었습니다.
+
+## 프로젝트 예상 결과물
+ **Statckture**은  원하는 기술 스택을 페이지 내에서 검색할 수 있는 기능을 제공하고, 원하는 기술 스택을 아래 그림처럼 저장해 둘 수 있는 기능을 제공합니다. 그리고 원하는 기술 스택을 모두 선택한 뒤 그리기 버튼을 누르면, 원하는 기술 스택 아이콘을 바로 가져다가 사용할 수 있도록 합니다. 또한 빠트린 기술 스택이 있을 수 있기 때문에 그리는 페이지 내에서 추가적으로 새로운 기술 스택 아이콘을 추가할 수 있는 기능을 제공합니다. 
+ 페이지 구성을 완료하면 로컬에 png, svg 등 다양한 포맷으로 저장할 수 있는 기능을 제공할 예정입니다.
+
+## 프로젝트 기술 스택
+- Front-end : HTML, CSS, Vanilla JavaScript
+- Back-end : FireBase (Using PaaS Service)
+- CDN : FireBase Cloud Storage
+
+## Deployed Link
 https://dawnglow.github.io/Stackture/
+<br>
+FireBase Api Key 노출 문제를 해결하는 대로 FireBase 서버와 연결시켜 배포할 예정입니다.
