@@ -1,3 +1,4 @@
+// src/js/components/DiagramDrawer/ElementResizer.js
 export class ElementResizer {
     constructor(elementManager) {
       this.elementManager = elementManager;

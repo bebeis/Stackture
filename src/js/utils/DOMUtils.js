@@ -1,3 +1,4 @@
+// src/js/utils/DOMUtils.js
 export class DOMUtils {
     static createElement(html) {
         const template = document.createElement('template');

@@ -1,3 +1,4 @@
+// src/js/components/DiagramDrawer/ElementDrawer.js
 export class ElementDrawer {
     constructor(elementManager) {
       this.elementManager = elementManager;
