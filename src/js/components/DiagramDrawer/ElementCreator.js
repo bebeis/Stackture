@@ -5,32 +5,31 @@ export class ElementCreator {
     }
   
     createNewElement(start, end) {
-      let element = {
-        type: this.elementManager.diagram.currentTool,
-        x: Math.min(start.x, end.x),
-        y: Math.min(start.y, end.y),
-        width: Math.abs(end.x - start.x),
-        height: Math.abs(end.y - start.y)
-      };
-  
-      if (this.elementManager.diagram.isShiftPressed) {
-        if (this.elementManager.diagram.currentTool === 'square' || 
-            this.elementManager.diagram.currentTool === 'circle') {
-          const size = Math.min(element.width, element.height);
-          element.width = size;
-          element.height = size;
+        let element = {
+          type: this.elementManager.diagram.currentTool,
+          x: start.x,
+          y: start.y,
+          width: end.x - start.x,
+          height: end.y - start.y
+        };
+      
+        // 화살표일 경우 음수 width/height 허용
+        if (element.type !== 'arrow') {
+          element.x = Math.min(start.x, end.x);
+          element.y = Math.min(start.y, end.y);
+          element.width = Math.abs(end.x - start.x);
+          element.height = Math.abs(end.y - start.y);
         }
+        
+        const minSize = 10;
+        if (element.type !== 'arrow' && element.width < minSize) element.width = minSize;
+        if (element.type !== 'arrow' && element.height < minSize) element.height = minSize;
+      
+        this.elementManager.elements.push(element);
+        this.elementManager.selectedElement = element;
+        this.elementManager.diagram.setTool('select');
+        this.elementManager.diagram.redraw();
       }
-  
-      const minSize = 10;
-      if (element.width < minSize) element.width = minSize;
-      if (element.height < minSize) element.height = minSize;
-  
-      this.elementManager.elements.push(element);
-      this.elementManager.selectedElement = element;
-      this.elementManager.diagram.setTool('select');
-      this.elementManager.diagram.redraw();
-    }
   
     startTextInput(pos) {
       if (this.elementManager.textInput) {

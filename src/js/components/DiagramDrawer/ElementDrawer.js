@@ -1,4 +1,4 @@
-// src/js/components/DiagramDrawer/ElementDrawer.js
+
 export class ElementDrawer {
     constructor(elementManager) {
       this.elementManager = elementManager;
@@ -65,28 +65,37 @@ export class ElementDrawer {
     }
   
     drawArrow(element) {
-      const ctx = this.elementManager.diagram.ctx;
-      const headLength = 10;
-      const dx = element.width;
-      const dy = element.height;
-      const angle = Math.atan2(dy, dx);
+        const ctx = this.elementManager.diagram.ctx;
+        const headLength = 10;
+        
+        // 시작점과 끝점
+        const startX = element.x;
+        const startY = element.y;
+        const endX = element.x + element.width;
+        const endY = element.y + element.height;
+        
+        // 각도 계산
+        const angle = Math.atan2(endY - startY, endX - startX);
+        
+        // 메인 선 그리기
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        
+        // 화살표 머리 그리기
+        ctx.lineTo(
+          endX - headLength * Math.cos(angle - Math.PI / 6),
+          endY - headLength * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(
+          endX - headLength * Math.cos(angle + Math.PI / 6),
+          endY - headLength * Math.sin(angle + Math.PI / 6)
+        );
+        
+        ctx.stroke();
+      }
       
-      ctx.beginPath();
-      ctx.moveTo(element.x, element.y);
-      ctx.lineTo(element.x + dx, element.y + dy);
-      
-      ctx.lineTo(
-        element.x + dx - headLength * Math.cos(angle - Math.PI / 6),
-        element.y + dy - headLength * Math.sin(angle - Math.PI / 6)
-      );
-      ctx.moveTo(element.x + dx, element.y + dy);
-      ctx.lineTo(
-        element.x + dx - headLength * Math.cos(angle + Math.PI / 6),
-        element.y + dy - headLength * Math.sin(angle + Math.PI / 6)
-      );
-      
-      ctx.stroke();
-    }
   
     drawText(element) {
       if (element.text) {
@@ -198,6 +207,7 @@ export class ElementDrawer {
           ctx.moveTo(start.x, start.y);
           ctx.lineTo(end.x, end.y);
           
+          // 화살표 머리 그리기
           ctx.lineTo(
             end.x - headLength * Math.cos(angle - Math.PI / 6),
             end.y - headLength * Math.sin(angle - Math.PI / 6)
