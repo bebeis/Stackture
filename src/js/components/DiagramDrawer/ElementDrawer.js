@@ -1,4 +1,3 @@
-
 export class ElementDrawer {
     constructor(elementManager) {
       this.elementManager = elementManager;
@@ -100,7 +99,8 @@ export class ElementDrawer {
     drawText(element) {
       if (element.text) {
         const ctx = this.elementManager.diagram.ctx;
-        ctx.font = element.font || '14px Arial';
+        ctx.fillStyle = '#000000';
+        ctx.font = element.font || '16px Arial';
         ctx.fillText(element.text, element.x, element.y);
       }
     }

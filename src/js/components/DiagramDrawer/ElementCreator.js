@@ -40,10 +40,23 @@ export class ElementCreator {
       this.elementManager.textInput.classList.add('text-input');
       this.elementManager.textInput.style.left = `${pos.x}px`;
       this.elementManager.textInput.style.top = `${pos.y}px`;
+      this.elementManager.textInput.style.position = 'absolute';
+      this.elementManager.textInput.style.minWidth = '100px';
+      this.elementManager.textInput.style.minHeight = '24px';
+      this.elementManager.textInput.style.padding = '4px';
+      this.elementManager.textInput.style.border = '1px solid #2196f3';
+      this.elementManager.textInput.style.outline = 'none';
+      this.elementManager.textInput.style.resize = 'both';
+      this.elementManager.textInput.style.overflow = 'hidden';
+      this.elementManager.textInput.style.backgroundColor = 'white';
+      this.elementManager.textInput.style.zIndex = '1000';
       
       this.elementManager.diagram.canvas.parentElement.appendChild(this.elementManager.textInput);
-      this.elementManager.textInput.focus();
-  
+      
+      setTimeout(() => {
+        this.elementManager.textInput.focus();
+      }, 0);
+
       this.elementManager.textInput.addEventListener('blur', () => {
         this.finalizeTextInput();
       });
@@ -63,21 +76,26 @@ export class ElementCreator {
           y: parseInt(this.elementManager.textInput.style.top)
         };
         
-        this.elementManager.elements.push({
+        const element = {
           type: 'text',
           x: pos.x,
           y: pos.y + 16,
           text: this.elementManager.textInput.value.trim(),
-          font: '16px Arial'
-        });
+          font: '16px Arial',
+          color: '#000000'
+        };
         
+        this.elementManager.elements.push(element);
+        this.elementManager.selectedElement = element;
         this.elementManager.diagram.historyManager.saveState();
-        this.elementManager.diagram.redraw();
       }
   
       if (this.elementManager.textInput) {
         this.elementManager.textInput.remove();
         this.elementManager.textInput = null;
       }
+  
+      this.elementManager.diagram.setTool('select');
+      this.elementManager.diagram.redraw();
     }
   }
