@@ -41,28 +41,27 @@ export class DiagramDrawer {
   }
 
   init() {
-    const canvasContainer = document.createElement('div');
-    canvasContainer.classList.add('canvas-container');
-
     this.canvas = document.createElement('canvas');
-    this.canvas.width = window.innerWidth - 40;
-    this.canvas.height = window.innerHeight - 300;
     this.canvas.classList.add('diagram-canvas');
-    this.canvas.style.zIndex = '500'; // CSS와 일치하도록 설정
+    
+    // 컨테이너 크기에 맞춰 캔버스 크기 설정
+    const containerHeight = this.container.clientHeight - 60; // 툴바 높이 고려
+    this.canvas.width = this.container.clientWidth;
+    this.canvas.height = containerHeight;
+    
     this.ctx = this.canvas.getContext('2d');
-
-    canvasContainer.appendChild(this.canvas);
-    this.container.appendChild(canvasContainer);
-
+    
     this.toolbarManager.init();
+    this.container.appendChild(this.canvas);
     this.gridManager.init();
 
-    // 캔버스 스타일 설정
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.top = '0';
-    this.canvas.style.left = '0';
-    this.canvas.style.zIndex = '500'; // 높은 z-index 설정
-  }
+    // 창 크기 변경 이벤트 핸들러 수정
+    window.addEventListener('resize', () => {
+        this.canvas.width = this.container.clientWidth;
+        this.canvas.height = this.container.clientHeight - 60;
+        this.redraw();
+    });
+}
 
   setupEventListeners() {
     this.canvas.addEventListener('mousedown', this.elementManager.handleMouseDown.bind(this.elementManager));
