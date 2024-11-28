@@ -70,13 +70,17 @@ export class ElementManager {
     if (this.isDrawing) {
       const pos = this.diagram.gridManager.snapToGrid(this.diagram.getMousePos(e));
 
-      const width = Math.abs(pos.x - this.startPos.x);
-      const height = Math.abs(pos.y - this.startPos.y);
+      // 그리드 영역 내에서만 그리기
+      if (this.isWithinGrid(pos)) {
+        const width = Math.abs(pos.x - this.startPos.x);
+        const height = Math.abs(pos.y - this.startPos.y);
 
-      if (width >= 10 || height >= 10) {
-        this.elementCreator.createNewElement(this.startPos, pos);
-        this.diagram.historyManager.saveState();
+        if (width >= 10 || height >= 10) {
+          this.elementCreator.createNewElement(this.startPos, pos);
+          this.diagram.historyManager.saveState();
+        }
       }
+
     } else if (this.isDragging || this.isResizing) {
       this.diagram.historyManager.saveState();
     }
@@ -88,8 +92,25 @@ export class ElementManager {
     this.originalElement = null;
   }
 
-  drawElements() {
-    this.elementDrawer.drawElements();
+  isWithinGrid(pos) {
+    // 그리드 영역 내인지 확인
+    const gridSettings = this.diagram.gridManager.getGridSettings();
+    const canvasWidth = this.diagram.canvas.width;
+    const canvasHeight = this.diagram.canvas.height;
+
+    return pos.x >= 0 && pos.x <= canvasWidth && pos.y >= 0 && pos.y <= canvasHeight;
+  }
+
+  deleteSelectedElement() {
+    if (this.selectedElement) {
+      const index = this.elements.indexOf(this.selectedElement);
+      if (index > -1) {
+        this.elements.splice(index, 1);
+        this.selectedElement = null;
+        this.diagram.redraw();
+        this.diagram.historyManager.saveState();
+      }
+    }
   }
 
   updateCursor(pos) {
@@ -117,6 +138,10 @@ export class ElementManager {
     }
   }
 
+  drawElements() {
+    this.elementDrawer.drawElements();
+  }
+
   getCursorForTool(tool) {
     switch (tool) {
       case 'text':
@@ -126,19 +151,5 @@ export class ElementManager {
       default:
         return 'crosshair';
     }
-  }
-
-  deleteSelectedElement() {
-    if (this.selectedElement) {
-      const index = this.elements.indexOf(this.selectedElement);
-      if (index > -1) {
-        this.elements.splice(index, 1);
-        this.selectedElement = null;
-        this.diagram.redraw();
-        this.diagram.historyManager.saveState();
-        return true;
-      }
-    }
-    return false;
   }
 }

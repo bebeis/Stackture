@@ -96,6 +96,12 @@ export class ElementDrawer {
     let y = start.y;
     let width = end.x - start.x;
     let height = end.y - start.y;
+
+    // 그리드 영역 내에서만 그리기
+    if (!this.isWithinGrid({ x: x + width / 2, y: y + height / 2 })) {
+      ctx.restore();
+      return;
+    }
   
     if (type !== 'arrow') {
       x = Math.min(start.x, end.x);
@@ -103,7 +109,7 @@ export class ElementDrawer {
       width = Math.abs(width);
       height = Math.abs(height);
     }
-  
+
     try {
       const tempElement = factory.createElement(type, x, y, width, height);
       tempElement.isSelected = true;
@@ -114,5 +120,12 @@ export class ElementDrawer {
   
     ctx.restore();
   }
-  
+
+  isWithinGrid(pos) {
+    const gridSettings = this.elementManager.diagram.gridManager.getGridSettings();
+    const canvasWidth = this.elementManager.diagram.canvas.width;
+    const canvasHeight = this.elementManager.diagram.canvas.height;
+
+    return pos.x >= 0 && pos.x <= canvasWidth && pos.y >= 0 && pos.y <= canvasHeight;
+  }
 }

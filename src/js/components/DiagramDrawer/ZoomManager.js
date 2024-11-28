@@ -34,17 +34,19 @@ export class ZoomManager {
       this.diagram.canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         if (e.ctrlKey || e.metaKey) {
-          const delta = e.deltaY < 0 ? 1.1 : 0.9;
-          const rect = this.diagram.canvas.getBoundingClientRect();
-          const mouseX = e.clientX - rect.left;
-          const mouseY = e.clientY - rect.top;
-          this.zoom(delta, mouseX, mouseY);
+          const zoomSpeed = 0.05;
+          const delta = e.deltaY < 0 ? (1 + zoomSpeed) : (1 - zoomSpeed);
+          
+          const centerX = this.diagram.canvas.width / 2;
+          const centerY = this.diagram.canvas.height / 2;
+          
+          this.zoom(delta, centerX, centerY);
         }
       });
   
-      // 스페이스바 + 드래그로 캔버스 이동
+      // 마우스 드래그로 캔버스 이동 (마우스 중간 버튼 또는 스페이스바)
       this.diagram.canvas.addEventListener('mousedown', (e) => {
-        if (e.button === 1 || e.getModifierState('Space')) { // 마우스 중간 버튼 또는 스페이스바
+        if (e.button === 1 || e.getModifierState('Space')) {
           e.preventDefault();
           this.isDragging = true;
           this.lastX = e.clientX;
@@ -53,83 +55,87 @@ export class ZoomManager {
         }
       });
   
+      // 마우스 오른쪽 버튼으로도 캔버스 이동 가능
+      this.diagram.canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this.isDragging = true;
+        this.lastX = e.clientX;
+        this.lastY = e.clientY;
+        this.diagram.canvas.style.cursor = 'grabbing';
+      });
+  
       this.diagram.canvas.addEventListener('mousemove', (e) => {
         if (this.isDragging) {
-          const dx = (e.clientX - this.lastX) / this.scale;
-          const dy = (e.clientY - this.lastY) / this.scale;
+          const dx = e.clientX - this.lastX;
+          const dy = e.clientY - this.lastY;
+          
           this.translateX += dx;
           this.translateY += dy;
+          
           this.lastX = e.clientX;
           this.lastY = e.clientY;
   
-          this.checkAndExpandCanvas();
+          this.limitTranslation();
           this.applyTransform();
         }
       });
   
-      document.addEventListener('mouseup', () => {
+      document.addEventListener('mouseup', (e) => {
         if (this.isDragging) {
           this.isDragging = false;
-          this.diagram.canvas.style.cursor = 'default';
+          if (e.getModifierState('Space')) {
+            this.diagram.canvas.style.cursor = 'grab';
+          } else {
+            this.diagram.canvas.style.cursor = 'default';
+          }
         }
       });
   
-      // 키보드 단축키
+      // 키보드 이벤트
       document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
+        if (e.code === 'Space' && !this.isDragging) {
           this.diagram.canvas.style.cursor = 'grab';
-        }
-  
-        if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
-          e.preventDefault();
-          this.zoom(1.1, this.diagram.canvas.width / 2, this.diagram.canvas.height / 2);
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key === '-') {
-          e.preventDefault();
-          this.zoom(0.9, this.diagram.canvas.width / 2, this.diagram.canvas.height / 2);
         }
       });
   
       document.addEventListener('keyup', (e) => {
         if (e.code === 'Space') {
-          this.diagram.canvas.style.cursor = 'default';
+          if (!this.isDragging) {
+            this.diagram.canvas.style.cursor = 'default';
+          }
         }
       });
     }
   
-    zoom(delta, mouseX, mouseY) {
+    zoom(delta, centerX, centerY) {
       const newScale = Math.min(Math.max(this.scale * delta, this.minScale), this.maxScale);
       
-      // 마우스 포인터 위치 기준으로 줌
       if (newScale !== this.scale) {
         const scaleRatio = newScale / this.scale;
-        const canvasX = (mouseX - this.translateX) / this.scale;
-        const canvasY = (mouseY - this.translateY) / this.scale;
+        
+        // 그리드 영역의 중앙을 기준으로 확대/축소
+        const canvasX = (centerX - this.translateX) / this.scale;
+        const canvasY = (centerY - this.translateY) / this.scale;
         
         this.translateX -= (canvasX * (scaleRatio - 1)) * this.scale;
         this.translateY -= (canvasY * (scaleRatio - 1)) * this.scale;
         this.scale = newScale;
         
+        this.limitTranslation();
         this.applyTransform();
       }
     }
   
-    checkAndExpandCanvas() {
-      const margin = 200; // 확장 트리거를 위한 여백
-      let needsUpdate = false;
-  
-      if (-this.translateX + margin > this.diagram.canvas.width) {
-        this.diagram.canvas.width += this.padding;
-        needsUpdate = true;
-      }
-      if (-this.translateY + margin > this.diagram.canvas.height) {
-        this.diagram.canvas.height += this.padding;
-        needsUpdate = true;
-      }
-  
-      if (needsUpdate) {
-        this.diagram.redraw();
-      }
+    limitTranslation() {
+      const viewportWidth = this.diagram.canvas.width;
+      const viewportHeight = this.diagram.canvas.height;
+      
+      // 캔버스 이동 제한
+      const maxTranslateX = viewportWidth * 0.5;  // 캔버스 너비의 50%까지만 이동 가능
+      const maxTranslateY = viewportHeight * 0.5; // 캔버스 높이의 50%까지만 이동 가능
+      
+      this.translateX = Math.max(Math.min(this.translateX, maxTranslateX), -maxTranslateX);
+      this.translateY = Math.max(Math.min(this.translateY, maxTranslateY), -maxTranslateY);
     }
   
     applyTransform() {

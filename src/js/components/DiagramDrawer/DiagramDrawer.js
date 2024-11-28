@@ -103,7 +103,7 @@ export class DiagramDrawer {
           case 'Escape':
             this.elementManager.selectedElement = null;
             this.elementManager.elementResizer.resizeHandle = null;
-            this.elementManager.diagram.redraw();
+            this.redraw();
             break;
         }
       }
@@ -142,7 +142,14 @@ export class DiagramDrawer {
   }
 
   redraw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // 배경을 회색으로 채우기
+    this.ctx.save();
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0); // 변환 초기화
+    this.ctx.fillStyle = 'gray';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.restore();
+
+    // 그리드 및 요소 그리기
     if (this.gridManager.showGrid) {
       this.gridManager.drawGrid();
     }
