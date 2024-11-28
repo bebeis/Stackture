@@ -10,10 +10,24 @@ export class ElementDrawer {
       return;
     }
     
-    element.draw(this.elementManager.diagram.ctx);
+    const ctx = this.elementManager.diagram.ctx;
+    ctx.save();
+    
+    // 줌 변환 적용
+    const zoom = this.elementManager.diagram.zoomManager;
+    ctx.setTransform(
+      zoom.scale, 0,
+      0, zoom.scale,
+      zoom.translateX,
+      zoom.translateY
+    );
+    
+    element.draw(ctx);
     if (element === this.elementManager.selectedElement) {
       this.drawResizeHandles(element);
     }
+    
+    ctx.restore();
   }
 
   drawElements() {

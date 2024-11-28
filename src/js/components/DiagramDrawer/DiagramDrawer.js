@@ -5,6 +5,7 @@ import { ElementManager } from './ElementManager.js';
 import { HistoryManager } from './HistoryManager.js';
 import { GridManager } from './GridManager.js';
 import './elements/index.js';
+import { ZoomManager } from './ZoomManager.js';
 
 export class DiagramDrawer {
   constructor(container, techStacks) {
@@ -12,16 +13,18 @@ export class DiagramDrawer {
     this.techStacks = techStacks;
     this.canvas = null;
     this.ctx = null;
-
-    // 상태 관리
     this.currentTool = 'select';
     this.isShiftPressed = false;
+
+    // 캔버스 초기화
+    this.initCanvas();
 
     // 매니저 초기화
     this.elementManager = new ElementManager(this);
     this.toolbarManager = new ToolbarManager(this);
     this.historyManager = new HistoryManager(this);
     this.gridManager = new GridManager(this);
+    this.zoomManager = new ZoomManager(this);
 
     // 지원되는 도구 목록 생성
     this.supportedTools = ['select', 'text', 'arrow'];
@@ -33,14 +36,15 @@ export class DiagramDrawer {
       });
     });
 
-    this.init();
+    // UI 초기화
+    this.initUI();
     this.setupEventListeners();
 
     // 초기 상태 저장
     this.historyManager.saveState();
   }
 
-  init() {
+  initCanvas() {
     this.canvas = document.createElement('canvas');
     this.canvas.classList.add('diagram-canvas');
     
@@ -50,18 +54,13 @@ export class DiagramDrawer {
     this.canvas.height = containerHeight;
     
     this.ctx = this.canvas.getContext('2d');
-    
-    this.toolbarManager.init();
     this.container.appendChild(this.canvas);
-    this.gridManager.init();
+  }
 
-    // 창 크기 변경 이벤트 핸들러 수정
-    window.addEventListener('resize', () => {
-        this.canvas.width = this.container.clientWidth;
-        this.canvas.height = this.container.clientHeight - 60;
-        this.redraw();
-    });
-}
+  initUI() {
+    this.toolbarManager.init();
+    this.gridManager.init();
+  }
 
   setupEventListeners() {
     this.canvas.addEventListener('mousedown', this.elementManager.handleMouseDown.bind(this.elementManager));
@@ -152,9 +151,10 @@ export class DiagramDrawer {
 
   getMousePos(e) {
     const rect = this.canvas.getBoundingClientRect();
-    return {
+    const point = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     };
+    return this.zoomManager.transformPoint(point.x, point.y);
   }
 }
