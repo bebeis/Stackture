@@ -37,8 +37,10 @@ export class ZoomManager {
           const zoomSpeed = 0.05;
           const delta = e.deltaY < 0 ? (1 + zoomSpeed) : (1 - zoomSpeed);
           
-          const centerX = this.diagram.canvas.width / 2;
-          const centerY = this.diagram.canvas.height / 2;
+          // 마우스 포인터 위치를 중심점으로 사용
+          const rect = this.diagram.canvas.getBoundingClientRect();
+          const centerX = e.clientX - rect.left;
+          const centerY = e.clientY - rect.top;
           
           this.zoom(delta, centerX, centerY);
         }
@@ -111,15 +113,16 @@ export class ZoomManager {
       const newScale = Math.min(Math.max(this.scale * delta, this.minScale), this.maxScale);
       
       if (newScale !== this.scale) {
-        const scaleRatio = newScale / this.scale;
+        // 마우스 위치의 실제 캔버스 좌표 계산
+        const mouseCanvasX = (centerX - this.translateX) / this.scale;
+        const mouseCanvasY = (centerY - this.translateY) / this.scale;
         
-        // 그리드 영역의 중앙을 기준으로 확대/축소
-        const canvasX = (centerX - this.translateX) / this.scale;
-        const canvasY = (centerY - this.translateY) / this.scale;
-        
-        this.translateX -= (canvasX * (scaleRatio - 1)) * this.scale;
-        this.translateY -= (canvasY * (scaleRatio - 1)) * this.scale;
+        // 새로운 scale 적용
         this.scale = newScale;
+        
+        // 새로운 translate 값 계산
+        this.translateX = centerX - mouseCanvasX * this.scale;
+        this.translateY = centerY - mouseCanvasY * this.scale;
         
         this.limitTranslation();
         this.applyTransform();
