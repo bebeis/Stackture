@@ -10,14 +10,15 @@ export class ElementManager {
   constructor(diagram) {
     this.diagram = diagram;
     this.elements = [];
-    this.selectedElement = null;
+    this.selectedElements = []; // 다중 선택된 요소들을 저장
     this.isDragging = false;
     this.isDrawing = false;
     this.isResizing = false;
     this.resizeHandle = null;
     this.startPos = { x: 0, y: 0 };
-    this.originalElement = null;
+    this.originalElements = []; // 선택된 요소들의 원본 상태 저장
     this.textInput = null;
+    this.selectionRectangle = null; // 드래그 선택을 위한 사각형
 
     this.elementFactory = elementFactory; // 싱글톤 인스턴스 사용
 
@@ -33,7 +34,7 @@ export class ElementManager {
 
     switch (this.diagram.currentTool) {
       case 'select':
-        this.elementSelector.handleSelectMouseDown(pos);
+        this.elementSelector.handleSelectMouseDown(e, pos);
         break;
 
       case 'text':
@@ -51,45 +52,55 @@ export class ElementManager {
     const pos = this.diagram.getMousePos(e);
     const snappedPos = this.diagram.gridManager.snapToGrid(pos);
 
-    if (this.isDragging && this.selectedElement) {
-      this.elementSelector.moveElement(snappedPos);
-    } else if (this.isResizing && this.selectedElement) {
-      this.elementResizer.resizeElement(snappedPos);
+    if (this.isDragging && this.selectedElements.length > 0) {
+      this.elementSelector.moveElements(snappedPos);
+    } else if (this.isResizing && this.selectedElements.length > 0) {
+      this.elementResizer.resizeElements(snappedPos);
     } else if (this.isDrawing) {
       this.diagram.redraw();
       if (this.diagram.gridManager.showGrid) {
         this.diagram.gridManager.drawGrid();
       }
       this.elementDrawer.drawPreview(this.startPos, snappedPos);
+    } else if (this.selectionRectangle) {
+      // 선택 사각형 업데이트 및 그리기
+      this.selectionRectangle.endX = snappedPos.x;
+      this.selectionRectangle.endY = snappedPos.y;
+      this.diagram.redraw();
+      this.elementDrawer.drawSelectionRectangle(this.selectionRectangle);
     }
 
     this.updateCursor(snappedPos);
   }
 
   handleMouseUp(e) {
-    if (this.isDrawing) {
-      const pos = this.diagram.gridManager.snapToGrid(this.diagram.getMousePos(e));
+    const pos = this.diagram.getMousePos(e);
+    const snappedPos = this.diagram.gridManager.snapToGrid(pos);
 
-      // 그리드 영역 내에서만 그리기
-      if (this.isWithinGrid(pos)) {
-        const width = Math.abs(pos.x - this.startPos.x);
-        const height = Math.abs(pos.y - this.startPos.y);
+    if (this.isDrawing) {
+      // 그리기 완료 처리
+      if (this.isWithinGrid(snappedPos)) {
+        const width = Math.abs(snappedPos.x - this.startPos.x);
+        const height = Math.abs(snappedPos.y - this.startPos.y);
 
         if (width >= 10 || height >= 10) {
-          this.elementCreator.createNewElement(this.startPos, pos);
+          this.elementCreator.createNewElement(this.startPos, snappedPos);
           this.diagram.historyManager.saveState();
         }
       }
-
     } else if (this.isDragging || this.isResizing) {
       this.diagram.historyManager.saveState();
+    } else if (this.selectionRectangle) {
+      // 선택 사각형으로 선택된 요소 처리
+      this.elementSelector.selectElementsInRectangle(this.selectionRectangle);
     }
 
     this.isDragging = false;
     this.isDrawing = false;
     this.isResizing = false;
     this.resizeHandle = null;
-    this.originalElement = null;
+    this.originalElements = [];
+    this.selectionRectangle = null;
   }
 
   isWithinGrid(pos) {
@@ -101,30 +112,25 @@ export class ElementManager {
     return pos.x >= 0 && pos.x <= canvasWidth && pos.y >= 0 && pos.y <= canvasHeight;
   }
 
-  deleteSelectedElement() {
-    if (this.selectedElement) {
-      const index = this.elements.indexOf(this.selectedElement);
-      if (index > -1) {
-        this.elements.splice(index, 1);
-        this.selectedElement = null;
-        this.diagram.redraw();
-        this.diagram.historyManager.saveState();
-      }
+  deleteSelectedElements() {
+    if (this.selectedElements.length > 0) {
+      this.elements = this.elements.filter(
+        (el) => !this.selectedElements.includes(el)
+      );
+      this.selectedElements = [];
+      this.diagram.redraw();
+      this.diagram.historyManager.saveState();
     }
   }
 
   updateCursor(pos) {
     if (this.diagram.currentTool === 'select') {
-      if (this.selectedElement) {
-        const handle = this.elementResizer.getResizeHandle(pos, this.selectedElement);
+      if (this.selectedElements.length > 0) {
+        const handle = this.elementResizer.getResizeHandle(pos, this.selectedElements);
 
         if (handle) {
-          if (this.selectedElement.type !== 'rectangle' && !['nw', 'ne', 'se', 'sw'].includes(handle)) {
-            this.diagram.canvas.style.cursor = 'default';
-            return;
-          }
           this.diagram.canvas.style.cursor = handle + '-resize';
-        } else if (this.elementSelector.isPointInElement(pos, this.selectedElement)) {
+        } else if (this.elementSelector.isPointInSelectedElements(pos)) {
           this.diagram.canvas.style.cursor = 'move';
         } else {
           this.diagram.canvas.style.cursor = 'default';

@@ -88,7 +88,7 @@ export class DiagramDrawer {
 
           case 'x':
             e.preventDefault();
-            this.elementManager.deleteSelectedElement();
+            this.elementManager.deleteSelectedElements();
             break;
         }
       } else {
@@ -97,12 +97,11 @@ export class DiagramDrawer {
           case 'Delete':
           case 'Backspace':
             e.preventDefault();
-            this.elementManager.deleteSelectedElement();
+            this.elementManager.deleteSelectedElements();
             break;
 
           case 'Escape':
-            this.elementManager.selectedElement = null;
-            this.elementManager.elementResizer.resizeHandle = null;
+            this.elementManager.deselectAll();
             this.redraw();
             break;
         }

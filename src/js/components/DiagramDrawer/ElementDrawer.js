@@ -9,24 +9,23 @@ export class ElementDrawer {
       console.error('Invalid element:', element);
       return;
     }
-    
+
     const ctx = this.elementManager.diagram.ctx;
     ctx.save();
-    
+
     // 줌 변환 적용
     const zoom = this.elementManager.diagram.zoomManager;
     ctx.setTransform(
-      zoom.scale, 0,
-      0, zoom.scale,
+      zoom.scale,
+      0,
+      0,
+      zoom.scale,
       zoom.translateX,
       zoom.translateY
     );
-    
+
     element.draw(ctx);
-    if (element === this.elementManager.selectedElement) {
-      this.drawResizeHandles(element);
-    }
-    
+
     ctx.restore();
   }
 
@@ -34,46 +33,75 @@ export class ElementDrawer {
     this.elementManager.elements.forEach((element) => {
       this.drawElement(element);
     });
+
+    // 선택된 요소들에 대해 크기 조절 핸들 그리기
+    if (this.elementManager.selectedElements.length > 0) {
+      this.drawResizeHandles(this.elementManager.selectedElements);
+    }
   }
 
-  drawResizeHandles(element) {
-    const handleSize = 8;
-    const handles = [];
-
-    if (element.type === 'rectangle' || element.type === 'icon' || element.type === 'text') {
-      handles.push(
-        { x: element.x, y: element.y, cursor: 'nw' },
-        { x: element.x + element.width / 2, y: element.y, cursor: 'n' },
-        { x: element.x + element.width, y: element.y, cursor: 'ne' },
-        { x: element.x + element.width, y: element.y + element.height / 2, cursor: 'e' },
-        { x: element.x + element.width, y: element.y + element.height, cursor: 'se' },
-        { x: element.x + element.width / 2, y: element.y + element.height, cursor: 's' },
-        { x: element.x, y: element.y + element.height, cursor: 'sw' },
-        { x: element.x, y: element.y + element.height / 2, cursor: 'w' }
-      );
-    } else {
-      handles.push(
-        { x: element.x, y: element.y, cursor: 'nw' },
-        { x: element.x + element.width, y: element.y, cursor: 'ne' },
-        { x: element.x + element.width, y: element.y + element.height, cursor: 'se' },
-        { x: element.x, y: element.y + element.height, cursor: 'sw' }
-      );
-    }
-
+  drawResizeHandles(elements) {
     const ctx = this.elementManager.diagram.ctx;
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#2196f3';
 
-    handles.forEach((handle) => {
-      ctx.beginPath();
-      ctx.rect(
-        handle.x - handleSize / 2,
-        handle.y - handleSize / 2,
-        handleSize,
-        handleSize
+    // 각 요소에 대해 크기 조절 핸들 그리기
+    elements.forEach((element) => {
+      ctx.save();
+
+      // 줌 변환 적용
+      const zoom = this.elementManager.diagram.zoomManager;
+      ctx.setTransform(
+        zoom.scale,
+        0,
+        0,
+        zoom.scale,
+        zoom.translateX,
+        zoom.translateY
       );
-      ctx.fill();
-      ctx.stroke();
+
+      const handleSize = 8;
+      const handles = [];
+
+      // 요소 타입에 따른 핸들 위치 설정
+      if (
+        element.type === 'rectangle' ||
+        element.type === 'icon' ||
+        element.type === 'text'
+      ) {
+        handles.push(
+          { x: element.x, y: element.y, cursor: 'nw' },
+          { x: element.x + element.width / 2, y: element.y, cursor: 'n' },
+          { x: element.x + element.width, y: element.y, cursor: 'ne' },
+          { x: element.x + element.width, y: element.y + element.height / 2, cursor: 'e' },
+          { x: element.x + element.width, y: element.y + element.height, cursor: 'se' },
+          { x: element.x + element.width / 2, y: element.y + element.height, cursor: 's' },
+          { x: element.x, y: element.y + element.height, cursor: 'sw' },
+          { x: element.x, y: element.y + element.height / 2, cursor: 'w' }
+        );
+      } else {
+        handles.push(
+          { x: element.x, y: element.y, cursor: 'nw' },
+          { x: element.x + element.width, y: element.y, cursor: 'ne' },
+          { x: element.x + element.width, y: element.y + element.height, cursor: 'se' },
+          { x: element.x, y: element.y + element.height, cursor: 'sw' }
+        );
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#2196f3';
+
+      handles.forEach((handle) => {
+        ctx.beginPath();
+        ctx.rect(
+          handle.x - handleSize / 2,
+          handle.y - handleSize / 2,
+          handleSize,
+          handleSize
+        );
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      ctx.restore();
     });
   }
 
@@ -81,16 +109,16 @@ export class ElementDrawer {
     const ctx = this.elementManager.diagram.ctx;
     ctx.save();
     ctx.setLineDash([5, 5]);
-  
+
     const type = this.elementManager.diagram.currentTool;
     const factory = this.elementManager.elementFactory;
-  
+
     // 현재 도구가 등록된 요소인지 확인
     if (!factory.elementClasses[type] && type !== 'select') {
       ctx.restore();
       return;
     }
-  
+
     // 임시 요소 생성
     let x = start.x;
     let y = start.y;
@@ -102,7 +130,7 @@ export class ElementDrawer {
       ctx.restore();
       return;
     }
-  
+
     if (type !== 'arrow') {
       x = Math.min(start.x, end.x);
       y = Math.min(start.y, end.y);
@@ -117,7 +145,23 @@ export class ElementDrawer {
     } catch (error) {
       console.warn(`Failed to create preview for type: ${type}`);
     }
-  
+
+    ctx.restore();
+  }
+
+  drawSelectionRectangle(rect) {
+    const ctx = this.elementManager.diagram.ctx;
+    ctx.save();
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = '#2196f3';
+
+    const x = Math.min(rect.startX, rect.endX);
+    const y = Math.min(rect.startY, rect.endY);
+    const width = Math.abs(rect.endX - rect.startX);
+    const height = Math.abs(rect.endY - rect.startY);
+
+    ctx.strokeRect(x, y, width, height);
+
     ctx.restore();
   }
 
