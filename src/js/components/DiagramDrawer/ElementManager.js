@@ -162,4 +162,57 @@ export class ElementManager {
   deselectAll() {
     this.elementSelector.deselectAll();
   }
+
+  copySelectedElements() {
+    if (this.selectedElements.length > 0) {
+      this.copiedElements = this.selectedElements.map(el => {
+        const copy = { ...el };
+        // IconElement인 경우 이미지 객체 복사
+        if (el.type === 'icon' && el.icon) {
+          const newImage = new Image();
+          newImage.src = el.icon.src;
+          copy.icon = newImage;
+          copy.tech = el.tech;
+        }
+        copy.x += 10;
+        copy.y += 10;
+        copy.isSelected = false;
+        return copy;
+      });
+    }
+  }
+
+  pasteElements() {
+    if (this.copiedElements && this.copiedElements.length > 0) {
+      const newElements = this.copiedElements.map(el => {
+        let newElement;
+        if (el.type === 'icon') {
+          newElement = this.elementFactory.createElement(
+            el.type,
+            el.x,
+            el.y,
+            el.width,
+            el.height,
+            el.icon,
+            el.tech
+          );
+        } else {
+          newElement = this.elementFactory.createElement(
+            el.type,
+            el.x,
+            el.y,
+            el.width,
+            el.height
+          );
+        }
+        newElement.isSelected = true;
+        return newElement;
+      });
+
+      this.elements.push(...newElements);
+      this.selectedElements = newElements;
+      this.diagram.redraw();
+      this.diagram.historyManager.saveState();
+    }
+  }
 }

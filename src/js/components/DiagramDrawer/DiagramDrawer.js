@@ -93,6 +93,20 @@ export class DiagramDrawer {
             e.preventDefault();
             this.elementManager.deleteSelectedElements();
             break;
+
+          case 'c':
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              this.elementManager.copySelectedElements();
+            }
+            break;
+
+          case 'v':
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              this.elementManager.pasteElements();
+            }
+            break;
         }
       } else {
         // 일반 키 처리

@@ -30,7 +30,7 @@ export class IconElement extends Element {
   }
 
   static register() {
-    elementFactory.registerElement('icons', IconElement.type, IconElement);
+    elementFactory.registerElement('icons', 'icon', IconElement);
   }
 }
 
