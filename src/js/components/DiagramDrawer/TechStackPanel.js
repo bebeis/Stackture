@@ -79,8 +79,8 @@ export class TechStackPanel {
         this.diagram.elementManager.elements.push(element);
         element.isSelected = true;
         this.diagram.elementManager.selectedElements = [element];
-        this.diagram.historyManager.saveState();
         this.diagram.redraw();
       };
+      this.diagram.historyManager.saveState();
     }
   }
