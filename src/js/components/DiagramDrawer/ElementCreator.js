@@ -41,9 +41,13 @@ export class ElementCreator {
 
     // 새로 생성된 요소를 배열에 추가하고 선택 상태로 설정
     this.elementManager.elements.push(element);
-    element.isSelected = true;  // 요소를 선택 상태로 설정
-    this.elementManager.selectedElement = element;
-    this.elementManager.diagram.setTool('select');  // 선택 모드로 전환
+    element.isSelected = true;
+    
+    // 기존 선택 해제 및 새 요소 선택
+    this.elementManager.selectedElements.forEach(el => el.isSelected = false);
+    this.elementManager.selectedElements = [element];
+    
+    this.elementManager.diagram.setTool('select');
     this.elementManager.diagram.redraw();
   }
 
