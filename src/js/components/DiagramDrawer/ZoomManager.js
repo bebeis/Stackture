@@ -30,7 +30,7 @@ export class ZoomManager {
     }
   
     setupEventListeners() {
-      // 마우스 휠 줌
+      // 마우스 휠 줌 및 팬
       this.diagram.canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         if (e.ctrlKey || e.metaKey) {
@@ -43,10 +43,18 @@ export class ZoomManager {
           const centerY = e.clientY - rect.top;
           
           this.zoom(delta, centerX, centerY);
+        } else {
+          // 팬 처리
+          const panSensitivity = 1; // 팬 민감도 조절 가능
+          this.translateX -= e.deltaX * panSensitivity;
+          this.translateY -= e.deltaY * panSensitivity;
+          
+          this.limitTranslation();
+          this.applyTransform();
         }
       });
   
-      // 마우스 드래그로 캔버스 이동 (마우스 중간 버튼 또는 스페이스바)
+      // 기존의 팬 이벤트 처리 유지
       this.diagram.canvas.addEventListener('mousedown', (e) => {
         if (e.button === 1 || e.getModifierState('Space')) {
           e.preventDefault();
@@ -57,7 +65,6 @@ export class ZoomManager {
         }
       });
   
-      // 마우스 오른쪽 버튼으로도 캔버스 이동 가능
       this.diagram.canvas.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         this.isDragging = true;
@@ -102,9 +109,7 @@ export class ZoomManager {
   
       document.addEventListener('keyup', (e) => {
         if (e.code === 'Space') {
-          if (!this.isDragging) {
-            this.diagram.canvas.style.cursor = 'default';
-          }
+          this.diagram.canvas.style.cursor = 'default';
         }
       });
     }
@@ -134,8 +139,8 @@ export class ZoomManager {
       const viewportHeight = this.diagram.canvas.height;
       
       // 캔버스 이동 제한
-      const maxTranslateX = viewportWidth * 0.5;  // 캔버스 너비의 50%까지만 이동 가능
-      const maxTranslateY = viewportHeight * 0.5; // 캔버스 높이의 50%까지만 이동 가능
+      const maxTranslateX = viewportWidth * 0.5;
+      const maxTranslateY = viewportHeight * 0.5;
       
       this.translateX = Math.max(Math.min(this.translateX, maxTranslateX), -maxTranslateX);
       this.translateY = Math.max(Math.min(this.translateY, maxTranslateY), -maxTranslateY);
