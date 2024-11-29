@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 그리기 버튼 이벤트 리스너 추가
   const drawButton = document.querySelector('.draw-button');
   drawButton.addEventListener('click', () => {
-    // 기존 컨테이너의 내용을 숨기고 다이어그램 컨테이너 생성
     const mainContainer = document.querySelector('.main-container');
     mainContainer.innerHTML = '';
     
@@ -20,7 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     diagramContainer.classList.add('diagram-container');
     mainContainer.appendChild(diagramContainer);
     
-    // 다이어그램 드로어 초기화
-    const diagramDrawer = new DiagramDrawer(diagramContainer, techStackSearch.techStacks);
+    // 선택된 기술 스택만 전달
+    const selectedTechStacks = techStackSearch.getSelectedTechStacks();
+    const diagramDrawer = new DiagramDrawer(diagramContainer, selectedTechStacks);
   });
 });

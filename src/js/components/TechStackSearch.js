@@ -151,4 +151,8 @@ export class TechStackSearch {
         this.selectedTechs.delete(techId);
         this.updateSelectedGrid();
     }
+
+    getSelectedTechStacks() {
+        return this.techStacks.filter(tech => this.selectedTechs.has(tech.id));
+    }
 }

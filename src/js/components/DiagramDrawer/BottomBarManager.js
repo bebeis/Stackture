@@ -12,15 +12,8 @@ export class BottomBarManager {
       const techList = document.createElement('div');
       techList.classList.add('tech-list');
       
-      // 선택된 기술 스택만 필터링
-      const selectedTechs = Array.from(document.querySelectorAll('.tech-item.selected'))
-        .map(item => {
-          const id = parseInt(item.dataset.id);
-          return this.diagram.techStacks.find(tech => tech.id === id);
-        })
-        .filter(tech => tech);
-  
-      selectedTechs.forEach(tech => this.createTechItem(tech, techList));
+      // diagram.techStacks에는 이미 선택된 기술 스택만 포함되어 있음
+      this.diagram.techStacks.forEach(tech => this.createTechItem(tech, techList));
       
       this.bottomBar.appendChild(techList);
       this.diagram.container.appendChild(this.bottomBar);
