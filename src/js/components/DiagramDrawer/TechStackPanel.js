@@ -1,4 +1,6 @@
 // src/js/components/DiagramDrawer/TechStackPanel.js
+import { IconElement } from './elements/IconElement.js';
+
 export class TechStackPanel {
     constructor(diagram) {
       this.diagram = diagram;
@@ -27,19 +29,21 @@ export class TechStackPanel {
     setupDragEvents() {
       this.panel.querySelectorAll('.tech-stack-item').forEach(item => {
         item.addEventListener('dragstart', (e) => {
-          const techId = e.target.dataset.techId;
-          e.dataTransfer.setData('text/plain', techId);
-          e.target.classList.add('dragging');
+          const techId = parseInt(item.dataset.techId);
+          e.dataTransfer.setData('application/json', JSON.stringify({
+            type: 'tech-stack',
+            id: techId
+          }));
+          item.classList.add('dragging');
         });
   
         item.addEventListener('dragend', (e) => {
-          e.target.classList.remove('dragging');
+          item.classList.remove('dragging');
         });
       });
   
       this.diagram.canvas.addEventListener('dragover', (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
         this.diagram.canvas.classList.add('drag-over');
       });
   
@@ -50,14 +54,19 @@ export class TechStackPanel {
       this.diagram.canvas.addEventListener('drop', (e) => {
         e.preventDefault();
         this.diagram.canvas.classList.remove('drag-over');
-  
-        const techId = parseInt(e.dataTransfer.getData('text/plain'));
-        const tech = this.techStacks.find(t => t.id === techId);
         
-        if (tech) {
-          const pos = this.diagram.getMousePos(e);
-          const snappedPos = this.diagram.gridManager.snapToGrid(pos);
-          this.createTechStackElement(tech, snappedPos);
+        try {
+          const data = JSON.parse(e.dataTransfer.getData('application/json'));
+          if (data.type === 'tech-stack') {
+            const tech = this.techStacks.find(t => t.id === data.id);
+            if (tech) {
+              const pos = this.diagram.getMousePos(e);
+              const snappedPos = this.diagram.gridManager.snapToGrid(pos);
+              this.createTechStackElement(tech, snappedPos);
+            }
+          }
+        } catch (err) {
+          console.error('드롭 처리 중 오류 발생:', err);
         }
       });
     }
@@ -66,7 +75,7 @@ export class TechStackPanel {
       const icon = new Image();
       icon.src = tech.icon;
       icon.onload = () => {
-        const element = this.diagram.elementFactory.createElement('icon', pos.x, pos.y, 48, 48, icon, tech);
+        const element = new IconElement(pos.x - 24, pos.y - 24, 48, 48, icon, tech);
         this.diagram.elementManager.elements.push(element);
         element.isSelected = true;
         this.diagram.elementManager.selectedElements = [element];
