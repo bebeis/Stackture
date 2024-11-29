@@ -158,4 +158,8 @@ export class ElementManager {
         return 'crosshair';
     }
   }
+
+  deselectAll() {
+    this.elementSelector.deselectAll();
+  }
 }

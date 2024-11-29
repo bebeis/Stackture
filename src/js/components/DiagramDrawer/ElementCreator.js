@@ -16,17 +16,13 @@ export class ElementCreator {
     let width = end.x - start.x;
     let height = end.y - start.y;
 
-    // 화살표가 아닌 경우 좌표 보정
+    // 최소 크기 보정
+    const minSize = 10;
     if (type !== 'arrow') {
       x = Math.min(start.x, end.x);
       y = Math.min(start.y, end.y);
       width = Math.abs(width);
       height = Math.abs(height);
-    }
-
-    // 최소 크기 보정
-    const minSize = 10;
-    if (type !== 'arrow') {
       width = Math.max(minSize, width);
       height = Math.max(minSize, height);
     }
@@ -35,6 +31,9 @@ export class ElementCreator {
     if (type === 'text') {
       this.startTextInput({ x, y });
       return;
+    } else if (type === 'arrow') {
+      const arrowType = this.elementManager.diagram.currentArrowType;
+      element = factory.createElement(type, x, y, width, height, arrowType);
     } else {
       element = factory.createElement(type, x, y, width, height);
     }
@@ -42,11 +41,11 @@ export class ElementCreator {
     // 새로 생성된 요소를 배열에 추가하고 선택 상태로 설정
     this.elementManager.elements.push(element);
     element.isSelected = true;
-    
+
     // 기존 선택 해제 및 새 요소 선택
-    this.elementManager.selectedElements.forEach(el => el.isSelected = false);
+    this.elementManager.selectedElements.forEach((el) => (el.isSelected = false));
     this.elementManager.selectedElements = [element];
-    
+
     this.elementManager.diagram.setTool('select');
     this.elementManager.diagram.redraw();
   }

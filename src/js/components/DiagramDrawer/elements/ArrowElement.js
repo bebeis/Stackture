@@ -8,8 +8,9 @@ export class ArrowElement extends Element {
   static icon = '➡️';
   static title = 'Arrow';
 
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, arrowType = 'one-way') {
     super(ArrowElement.type, x, y, width, height);
+    this.arrowType = arrowType; // 'one-way', 'two-way', 'line'
   }
 
   draw(ctx) {
@@ -20,37 +21,47 @@ export class ArrowElement extends Element {
     const endX = this.x + this.width;
     const endY = this.y + this.height;
 
-    // 화살표 선 그리기
+    ctx.strokeStyle = this.isSelected ? '#2196f3' : '#000000';
+    ctx.lineWidth = this.isSelected ? 2 : 1;
+
+    // 선 그리기
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
-    ctx.strokeStyle = this.isSelected ? '#2196f3' : '#000000';
-    ctx.lineWidth = this.isSelected ? 2 : 1;
     ctx.stroke();
 
     // 화살표 머리 그리기
-    const angle = Math.atan2(endY - startY, endX - startX);
-    const arrowHeadLength = 10;
+    const drawArrowHead = (fromX, fromY, toX, toY) => {
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      const arrowHeadLength = 10;
 
-    ctx.beginPath();
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-      endX - arrowHeadLength * Math.cos(angle - Math.PI / 6),
-      endY - arrowHeadLength * Math.sin(angle - Math.PI / 6)
-    );
-    ctx.lineTo(
-      endX - arrowHeadLength * Math.cos(angle + Math.PI / 6),
-      endY - arrowHeadLength * Math.sin(angle + Math.PI / 6)
-    );
-    ctx.lineTo(endX, endY);
-    ctx.fillStyle = this.isSelected ? '#2196f3' : '#000000';
-    ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(
+        toX - arrowHeadLength * Math.cos(angle - Math.PI / 6),
+        toY - arrowHeadLength * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        toX - arrowHeadLength * Math.cos(angle + Math.PI / 6),
+        toY - arrowHeadLength * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fillStyle = this.isSelected ? '#2196f3' : '#000000';
+      ctx.fill();
+    };
+
+    if (this.arrowType === 'one-way' || this.arrowType === 'two-way') {
+      drawArrowHead(startX, startY, endX, endY);
+    }
+
+    if (this.arrowType === 'two-way') {
+      drawArrowHead(endX, endY, startX, startY);
+    }
 
     ctx.restore();
   }
 
   containsPoint(x, y) {
-    // 점이 선분에 가까운지 계산
     const distance = this._distanceToLineSegment(
       x,
       y,
@@ -59,8 +70,7 @@ export class ArrowElement extends Element {
       this.x + this.width,
       this.y + this.height
     );
-
-    return distance <= 5; // 허용 오차 내에 있으면 선택된 것으로 간주
+    return distance <= 5;
   }
 
   _distanceToLineSegment(px, py, x1, y1, x2, y2) {
@@ -78,10 +88,27 @@ export class ArrowElement extends Element {
     return Math.hypot(px - projectionX, py - projectionY);
   }
 
+  serialize() {
+    const data = super.serialize();
+    data.arrowType = this.arrowType;
+    return data;
+  }
+
+  static createFromData(data) {
+    const element = new ArrowElement(
+      data.x,
+      data.y,
+      data.width,
+      data.height,
+      data.arrowType
+    );
+    Object.assign(element, data);
+    return element;
+  }
+
   static register() {
-    elementFactory.registerElement('connectors', 'arrow', ArrowElement);
+    elementFactory.registerElement('connectors', ArrowElement.type, ArrowElement);
   }
 }
 
-// 클래스가 로드될 때 자동으로 등록
 ArrowElement.register();

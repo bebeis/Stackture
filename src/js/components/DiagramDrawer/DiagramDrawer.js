@@ -15,6 +15,7 @@ export class DiagramDrawer {
     this.ctx = null;
     this.currentTool = 'select';
     this.isShiftPressed = false;
+    this.currentArrowType = 'one-way';
 
     // 캔버스 초기화
     this.initCanvas();
@@ -122,18 +123,20 @@ export class DiagramDrawer {
     });
   }
 
-  setTool(toolId) {
+  setTool(toolId, subType = null) {
     if (!this.supportedTools.includes(toolId)) {
       throw new Error(`Unsupported tool: ${toolId}`);
     }
     this.currentTool = toolId;
 
+    // 화살표 타입 설정
+    if (toolId === 'arrow' && subType) {
+      this.currentArrowType = subType;
+    }
+
     // select 모드가 아닌 다른 도구로 변경할 때는 선택 해제
     if (toolId !== 'select') {
-      if (this.elementManager.selectedElement) {
-        this.elementManager.selectedElement.isSelected = false;
-        this.elementManager.selectedElement = null;
-      }
+      this.elementManager.deselectAll();
     }
 
     this.toolbarManager.updateToolbarState(this.toolbarManager.getToolButton(toolId));

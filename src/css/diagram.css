@@ -220,3 +220,31 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  /* src/css/diagram.css */
+
+/* 추가된 스타일 */
+.arrows-submenu {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+  padding: 4px;
+}
+
+.arrows-submenu button {
+  padding: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.arrows-submenu button:hover {
+  background-color: #f0f0f0;
+}

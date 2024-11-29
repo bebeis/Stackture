@@ -7,12 +7,14 @@ export class ToolbarManager {
     this.diagram = diagram;
     this.toolbar = null;
     this.shapesSubmenu = null;
+    this.arrowsSubmenu = null;
     this.elementManager = diagram.elementManager;
   }
 
   init() {
     this.createToolbar();
     this.createShapesSubmenu();
+    this.createArrowsSubmenu();
     this.setupOutsideClickHandler();
   }
 
@@ -23,8 +25,8 @@ export class ToolbarManager {
     const tools = [
       { id: 'select', icon: '👆', title: 'Select' },
       { id: 'shapes', icon: '⬜', title: 'Shapes' },
+      { id: 'arrows', icon: '➡️', title: 'Arrows' },
       { id: 'text', icon: 'T', title: 'Text' },
-      { id: 'arrow', icon: '➡️', title: 'Arrow' }
     ];
 
     tools.forEach((tool) => this.createToolButton(tool));
@@ -42,14 +44,63 @@ export class ToolbarManager {
     button.addEventListener('click', () => {
       if (tool.id === 'shapes') {
         this.toggleShapesSubmenu(button);
+        this.hideArrowsSubmenu();
+      } else if (tool.id === 'arrows') {
+        this.toggleArrowsSubmenu(button);
+        this.hideShapesSubmenu();
       } else {
         this.diagram.setTool(tool.id);
-        this.hideShapesSubmenu();
+        this.hideSubmenus();
         this.updateToolbarState(button);
       }
     });
 
     this.toolbar.appendChild(button);
+  }
+
+  createArrowsSubmenu() {
+    this.arrowsSubmenu = document.createElement('div');
+    this.arrowsSubmenu.classList.add('arrows-submenu', 'submenu');
+    this.arrowsSubmenu.style.display = 'none';
+
+    const arrowTypes = [
+      { type: 'one-way', icon: '➡️', title: '단방향 화살표' },
+      { type: 'two-way', icon: '⟷', title: '양방향 화살표' },
+      { type: 'line', icon: '━', title: '선 (화살표 없음)' },
+    ];
+
+    arrowTypes.forEach((arrow) => {
+      const button = document.createElement('button');
+      button.innerHTML = arrow.icon;
+      button.title = arrow.title;
+      button.addEventListener('click', () => {
+        this.diagram.setTool('arrow', arrow.type);
+        this.hideSubmenus();
+        this.updateToolbarState(this.getToolButton('arrows'));
+      });
+      this.arrowsSubmenu.appendChild(button);
+    });
+
+    this.diagram.container.appendChild(this.arrowsSubmenu);
+  }
+
+  toggleArrowsSubmenu(button) {
+    const buttonRect = button.getBoundingClientRect();
+    const containerRect = this.diagram.container.getBoundingClientRect();
+    
+    this.arrowsSubmenu.style.position = 'absolute';
+    this.arrowsSubmenu.style.display = this.arrowsSubmenu.style.display === 'none' ? 'flex' : 'none';
+    this.arrowsSubmenu.style.top = `${buttonRect.bottom - containerRect.top}px`;
+    this.arrowsSubmenu.style.left = `${buttonRect.left - containerRect.left}px`;
+  }
+
+  hideSubmenus() {
+    if (this.shapesSubmenu) {
+      this.shapesSubmenu.style.display = 'none';
+    }
+    if (this.arrowsSubmenu) {
+      this.arrowsSubmenu.style.display = 'none';
+    }
   }
 
   createUtilityButtons() {
@@ -107,6 +158,12 @@ export class ToolbarManager {
   hideShapesSubmenu() {
     if (this.shapesSubmenu) {
       this.shapesSubmenu.style.display = 'none';
+    }
+  }
+
+  hideArrowsSubmenu() {
+    if (this.arrowsSubmenu) {
+      this.arrowsSubmenu.style.display = 'none';
     }
   }
 
