@@ -1,4 +1,5 @@
 // src/js/components/DiagramDrawer/HistoryManager.js
+import { IconElement } from './elements/IconElement.js';
 export class HistoryManager {
     constructor(diagram) {
       this.diagram = diagram;
@@ -9,40 +10,59 @@ export class HistoryManager {
   
     saveState() {
       const currentState = {
-        elements: this.diagram.elementManager.elements.map(el => ({
-          type: el.type,
-          x: el.x,
-          y: el.y,
-          width: el.width,
-          height: el.height,
-          isSelected: el.isSelected,
-          // 필요한 다른 속성들도 여기에 추가
-        })),
+        elements: this.diagram.elementManager.elements.map(el => {
+          const data = {
+            type: el.type,
+            x: el.x,
+            y: el.y,
+            width: el.width,
+            height: el.height,
+            isSelected: el.isSelected,
+          };
+          
+          if (el.type === 'icon') {
+            data.icon = el.icon;
+            data.tech = el.tech;
+          } else if (el.type === 'arrow') {
+            data.arrowType = el.arrowType;
+          }
+          
+          return data;
+        }),
         selectedElements: this.diagram.elementManager.selectedElements.map(el => 
           this.diagram.elementManager.elements.indexOf(el)
         )
       };
       
       this.history.push(currentState);
-      
-      if (this.history.length > this.maxHistorySize) {
-        this.history.shift();
-      }
-      
+      if (this.history.length > this.maxHistorySize) this.history.shift();
       this.redoStack = [];
-      
-      console.log('State saved. History size:', this.history.length);
     }
   
     restoreElements(elementDataArray) {
       return elementDataArray.map(data => {
-        const element = this.diagram.elementManager.elementFactory.createElement(
-          data.type,
-          data.x,
-          data.y,
-          data.width,
-          data.height
-        );
+        let element;
+        
+        if (data.type === 'icon') {
+          element = new IconElement(
+            data.x,
+            data.y,
+            data.width,
+            data.height,
+            data.icon,
+            data.tech
+          );
+        } else {
+          element = this.diagram.elementManager.elementFactory.createElement(
+            data.type,
+            data.x,
+            data.y,
+            data.width,
+            data.height,
+            data.arrowType
+          );
+        }
+        
         element.isSelected = data.isSelected;
         return element;
       });
