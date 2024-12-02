@@ -260,24 +260,24 @@ body {
     height: 100%;
     pointer-events: none;
     z-index: 1;
+    overflow: hidden;
 }
 
 .floating-icon {
     position: absolute;
     width: 48px;
     height: 48px;
-    cursor: grab;
-    pointer-events: auto;
+    pointer-events: none;
     opacity: 0.7;
-    transition: opacity 0.3s;
     filter: grayscale(50%);
     user-select: none;
+    will-change: transform;
 }
 
 .floating-icon:hover {
     opacity: 1;
     filter: grayscale(0%);
-    transform: scale(1.1);
+    transform: translateY(calc(100vh - 130px)) scale(1.1) rotate(360deg) !important;
 }
 
 .floating-icon.dragging {

@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await techStackSearch.init();
 
     const floatingIcons = new FloatingIcons();
+    floatingIcons.setTechStackSearch(techStackSearch);
     
     const drawButton = document.querySelector('.draw-button');
     drawButton.addEventListener('click', () => {
