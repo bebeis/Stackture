@@ -17,9 +17,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const techStackSearch = new TechStackSearch();
-    await techStackSearch.init();
-
     const floatingIcons = new FloatingIcons();
+    
+    // TechStackSearch 초기화가 완료된 후 FloatingIcons 설정
+    await techStackSearch.init();
     floatingIcons.setTechStackSearch(techStackSearch);
     
     const drawButton = document.querySelector('.draw-button');

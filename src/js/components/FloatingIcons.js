@@ -4,17 +4,18 @@ export class FloatingIcons {
         this.icons = [];
         this.iconSize = 48;
         this.techStackSearch = null;
-        this.init();
     }
 
     setTechStackSearch(techStackSearch) {
         this.techStackSearch = techStackSearch;
+        this.init();
     }
 
     async init() {
+        if (!this.techStackSearch) return;
+
         try {
-            const { mockTechStacks } = await import('../data/mockData.js');
-            const allIcons = mockTechStacks;
+            const allIcons = this.techStackSearch.techStacks;
             
             allIcons.forEach((tech) => {
                 const icon = this.createIcon(tech);
