@@ -118,16 +118,16 @@ export class ZoomManager {
       const newScale = Math.min(Math.max(this.scale * delta, this.minScale), this.maxScale);
       
       if (newScale !== this.scale) {
-        // 마우스 위치의 실제 캔버스 좌표 계산
-        const mouseCanvasX = (centerX - this.translateX) / this.scale;
-        const mouseCanvasY = (centerY - this.translateY) / this.scale;
+        // 현재 마우스 위치의 캔버스 상의 실제 좌표 계산
+        const mouseX = (centerX - this.translateX) / this.scale;
+        const mouseY = (centerY - this.translateY) / this.scale;
         
         // 새로운 scale 적용
         this.scale = newScale;
         
-        // 새로운 translate 값 계산
-        this.translateX = centerX - mouseCanvasX * this.scale;
-        this.translateY = centerY - mouseCanvasY * this.scale;
+        // 마우스 위치를 기준으로 새로운 translate 값 계산
+        this.translateX = centerX - mouseX * this.scale;
+        this.translateY = centerY - mouseY * this.scale;
         
         this.limitTranslation();
         this.applyTransform();
