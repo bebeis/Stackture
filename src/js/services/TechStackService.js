@@ -2,44 +2,59 @@ import { database, storage } from '../firebase/firebase-config.js';
 import { mockTechStacks } from '../data/mockData.js';
 
 export class TechStackService {
+    constructor() {
+        this.imageCache = new Map();
+        this.preloadPromises = new Map();
+    }
+
     async getTechStacks() {
         try {
-            console.log('Fetching tech stacks from Firebase...');
-            const snapshot = await database.ref('api/tech-stacks').get();
-            
-            if (snapshot.exists()) {
-                const techStacks = snapshot.val();
-                console.log('Raw tech stacks data:', techStacks);
-
-                // Storage에서 아이콘 URL 가져오기
-                const techStacksWithIcons = await Promise.all(
-                    techStacks.map(async tech => {
-                        try {
-                            const iconFileName = tech.name.toLowerCase()
-                                .replace('.', '')
-                                .replace(/\s+/g, '');
-                            console.log(`Fetching icon for ${tech.name}: ${iconFileName}.svg`);
-                            const iconUrl = await storage.ref(`tech-stack/${iconFileName}.svg`)
-                                .getDownloadURL();
-                            return { ...tech, icon: iconUrl };
-                        } catch (error) {
-                            console.warn(`Icon load failed for ${tech.name}:`, error);
-                            return { 
-                                ...tech, 
-                                icon: `./public/icons/${tech.name.toLowerCase().replace('.', '')}.svg` 
-                            };
-                        }
-                    })
-                );
-                console.log('Tech stacks with icons:', techStacksWithIcons);
-                return techStacksWithIcons;
-            }
-            console.warn('No data found in Firebase, using mock data');
-            return mockTechStacks;
+            const techStacks = await this.fetchTechStacks();
+            await this.preloadImages(techStacks);
+            return techStacks;
         } catch (error) {
-            console.error('Firebase error:', error);
+            console.error('Failed to get tech stacks:', error);
             return mockTechStacks;
         }
+    }
+
+    async preloadImages(techStacks) {
+        const preloadPromises = techStacks.map(tech => this.preloadImage(tech.icon));
+        await Promise.all(preloadPromises);
+    }
+
+    preloadImage(src) {
+        if (this.preloadPromises.has(src)) {
+            return this.preloadPromises.get(src);
+        }
+
+        const promise = new Promise((resolve, reject) => {
+            if (this.imageCache.has(src)) {
+                resolve(this.imageCache.get(src));
+                return;
+            }
+
+            const img = new Image();
+            
+            img.onload = () => {
+                this.imageCache.set(src, img);
+                resolve(img);
+            };
+            
+            img.onerror = (err) => {
+                console.warn(`Failed to preload image: ${src}`, err);
+                reject(err);
+            };
+
+            img.src = src;
+        });
+
+        this.preloadPromises.set(src, promise);
+        return promise;
+    }
+
+    getCachedImage(src) {
+        return this.imageCache.get(src);
     }
 
     filterTechStacks(techStacks, searchTerm) {

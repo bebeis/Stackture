@@ -4,23 +4,31 @@ import { FloatingIcons } from './components/FloatingIcons.js';
 import { DiagramDrawer } from './components/DiagramDrawer/DiagramDrawer.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const techStackSearch = new TechStackSearch();
-  await techStackSearch.init(); // 초기화 완료를 기다림
+    // 서비스 워커 등록
+    if ('serviceWorker' in navigator) {
+        try {
+            await navigator.serviceWorker.register('/service-worker.js');
+            console.log('Service Worker registered successfully');
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+        }
+    }
 
-  const floatingIcons = new FloatingIcons();
-  
-  // 그리기 버튼 이벤트 리스너 추가
-  const drawButton = document.querySelector('.draw-button');
-  drawButton.addEventListener('click', () => {
-    const mainContainer = document.querySelector('.main-container');
-    mainContainer.innerHTML = '';
+    const techStackSearch = new TechStackSearch();
+    await techStackSearch.init();
+
+    const floatingIcons = new FloatingIcons();
     
-    const diagramContainer = document.createElement('div');
-    diagramContainer.classList.add('diagram-container');
-    mainContainer.appendChild(diagramContainer);
-    
-    // 선택된 기술 스택만 전달
-    const selectedTechStacks = techStackSearch.getSelectedTechStacks();
-    const diagramDrawer = new DiagramDrawer(diagramContainer, selectedTechStacks);
-  });
+    const drawButton = document.querySelector('.draw-button');
+    drawButton.addEventListener('click', () => {
+        const mainContainer = document.querySelector('.main-container');
+        mainContainer.innerHTML = '';
+        
+        const diagramContainer = document.createElement('div');
+        diagramContainer.classList.add('diagram-container');
+        mainContainer.appendChild(diagramContainer);
+        
+        const selectedTechStacks = techStackSearch.getSelectedTechStacks();
+        const diagramDrawer = new DiagramDrawer(diagramContainer, selectedTechStacks);
+    });
 });
