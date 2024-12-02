@@ -44,7 +44,14 @@ export class FloatingIcons {
 
     createIcon(tech) {
         const icon = document.createElement('img');
-        icon.src = tech.icon;
+        const cachedImage = this.techStackSearch.techStackService.getCachedImage(tech.icon);
+        
+        if (cachedImage) {
+            icon.src = cachedImage.src;
+        } else {
+            icon.src = tech.icon;
+        }
+        
         icon.className = 'floating-icon';
         icon.alt = tech.name;
         icon.draggable = false;

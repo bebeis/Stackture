@@ -65,12 +65,17 @@ export class TechStackSearch {
         if (filteredTechs.length === 0) {
             this.searchResults.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
         } else {
-            this.searchResults.innerHTML = filteredTechs.map(tech => `
-                <div class="tech-item" data-id="${tech.id}">
-                    <img src="${tech.icon}" alt="${tech.name}" class="tech-icon">
-                    <span>${tech.name}</span>
-                </div>
-            `).join('');
+            this.searchResults.innerHTML = filteredTechs.map(tech => {
+                const cachedImage = this.techStackService.getCachedImage(tech.icon);
+                const iconSrc = cachedImage ? cachedImage.src : tech.icon;
+                
+                return `
+                    <div class="tech-item" data-id="${tech.id}">
+                        <img src="${iconSrc}" alt="${tech.name}" class="tech-icon">
+                        <span>${tech.name}</span>
+                    </div>
+                `;
+            }).join('');
             
             // 검색 결과 클릭 이벤트
             this.searchResults.querySelectorAll('.tech-item').forEach(item => {

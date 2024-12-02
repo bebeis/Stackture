@@ -72,13 +72,28 @@ export class TechStackService {
     }
 
     async preloadImages(techStacks) {
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        
         try {
             console.log('이미지 프리로딩 시작...');
             const preloadPromises = techStacks.map(tech => this.preloadImage(tech.icon));
             await Promise.all(preloadPromises);
+            console.log('이미지 프리로딩 완료');
+            
+            // CSS 트랜지션을 위한 스타일 추가
+            loadingOverlay.style.transition = 'opacity 0.5s ease-in-out';
+            loadingOverlay.style.opacity = '0';
+            
+            // 페이드 아웃 후 요소 제거
+            setTimeout(() => {
+                loadingOverlay.remove();
+            }, 500);
+            
         } catch (error) {
             console.error('이미지 프리로딩 실패:', error);
-            throw error;
+            if (loadingOverlay) {
+                loadingOverlay.remove();
+            }
         }
     }
 
