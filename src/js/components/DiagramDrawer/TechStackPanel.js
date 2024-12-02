@@ -6,6 +6,7 @@ export class TechStackPanel {
       this.diagram = diagram;
       this.panel = null;
       this.techStacks = diagram.techStacks || [];
+      this.tooltipShown = false;
       this.init();
     }
   
@@ -16,6 +17,7 @@ export class TechStackPanel {
       
       this.renderTechStacks();
       this.setupDragEvents();
+      this.setupTooltip();
     }
   
     renderTechStacks() {
@@ -82,5 +84,31 @@ export class TechStackPanel {
         this.diagram.redraw();
       };
       this.diagram.historyManager.saveState();
+    }
+  
+    setupTooltip() {
+      const items = this.panel.querySelectorAll('.tech-stack-item');
+      
+      items.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          if (!this.tooltipShown) {
+            this.showDragTooltip();
+          }
+        });
+      });
+    }
+  
+    showDragTooltip() {
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('drag-tooltip');
+      tooltip.textContent = '아이콘을 드래그하여 캔버스에 추가할 수 있습니다';
+      document.body.appendChild(tooltip);
+      
+      this.tooltipShown = true;
+      
+      setTimeout(() => {
+        tooltip.remove();
+        this.tooltipShown = false;
+      }, 3000);
     }
   }
