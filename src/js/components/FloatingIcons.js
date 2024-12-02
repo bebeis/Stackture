@@ -60,52 +60,73 @@ export class FloatingIcons {
     }
 
     checkCollision(icon1, icon2) {
-        return (
-            icon1.x < icon2.x + icon2.width &&
-            icon1.x + icon1.width > icon2.x &&
-            icon1.y < icon2.y + icon2.height &&
-            icon1.y + icon1.height > icon2.y
-        );
+        // 각 아이콘의 중심점 계산
+        const center1 = {
+            x: icon1.x + icon1.width / 2,
+            y: icon1.y + icon1.height / 2
+        };
+        const center2 = {
+            x: icon2.x + icon2.width / 2,
+            y: icon2.y + icon2.height / 2
+        };
+
+        // 두 중심점 사이의 거리 계산
+        const dx = center2.x - center1.x;
+        const dy = center2.y - center1.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // 아이콘의 반지름 (정사각형 아이콘 기준)
+        const radius = icon1.width / 2;
+        
+        // 두 원이 겹치는지 확인
+        return distance < radius * 2;
     }
 
     resolveCollision(icon1, icon2) {
-        // 충돌 시 속도 교환
-        const tempVX = icon1.velocityX;
-        const tempVY = icon1.velocityY;
-        
-        icon1.velocityX = icon2.velocityX * 0.8;
-        icon1.velocityY = icon2.velocityY * 0.8;
-        
-        icon2.velocityX = tempVX * 0.8;
-        icon2.velocityY = tempVY * 0.8;
+        // 각 아이콘의 중심점 계산
+        const center1 = {
+            x: icon1.x + icon1.width / 2,
+            y: icon1.y + icon1.height / 2
+        };
+        const center2 = {
+            x: icon2.x + icon2.width / 2,
+            y: icon2.y + icon2.height / 2
+        };
 
-        // 회전 속도에도 영향
-        const tempRotation = icon1.rotationVelocity;
-        icon1.rotationVelocity = icon2.rotationVelocity * 0.5;
-        icon2.rotationVelocity = tempRotation * 0.5;
+        // 충돌 각도 계산
+        const dx = center2.x - center1.x;
+        const dy = center2.y - center1.y;
+        const angle = Math.atan2(dy, dx);
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // X축 겹침 처리
-        const overlapX = this.iconSize - Math.abs(icon1.x - icon2.x);
-        if (overlapX > 0) {
-            if (icon1.x < icon2.x) {
-                icon1.x -= overlapX / 2;
-                icon2.x += overlapX / 2;
-            } else {
-                icon1.x += overlapX / 2;
-                icon2.x -= overlapX / 2;
-            }
-        }
+        // 겹침 정도 계산
+        const radius = icon1.width / 2;
+        const overlap = 2 * radius - distance;
 
-        // Y축 겹침 처리
-        const overlapY = this.iconSize - Math.abs(icon1.y - icon2.y);
-        if (overlapY > 0) {
-            if (icon1.y < icon2.y) {
-                icon1.y -= overlapY / 2;
-                icon2.y += overlapY / 2;
-            } else {
-                icon1.y += overlapY / 2;
-                icon2.y -= overlapY / 2;
-            }
+        if (overlap > 0) {
+            // 겹침을 해결하기 위해 아이콘들을 밀어냄
+            const pushX = (overlap / 2) * Math.cos(angle);
+            const pushY = (overlap / 2) * Math.sin(angle);
+
+            icon1.x -= pushX;
+            icon1.y -= pushY;
+            icon2.x += pushX;
+            icon2.y += pushY;
+
+            // 충돌 후 속도 계산
+            const normalX = dx / distance;
+            const normalY = dy / distance;
+            
+            const p = 2 * (icon1.velocityX * normalX + icon1.velocityY * normalY);
+            
+            // 탄성 계수와 마찰 계수 설정
+            const bounce = 0.5;  // 0.8에서 0.5로 감소
+            const friction = 0.95;  // 마찰 계수
+
+            icon1.velocityX -= p * normalX * bounce;
+            icon1.velocityY -= p * normalY * bounce;
+            icon2.velocityX += p * normalX * bounce;
+            icon2.velocityY += p * normalY * bounce;
         }
     }
 
