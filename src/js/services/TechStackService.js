@@ -15,7 +15,9 @@ export class TechStackService {
                 const techStacksWithIcons = await Promise.all(
                     techStacks.map(async tech => {
                         try {
-                            const iconFileName = tech.name.toLowerCase().replace('.', '');
+                            const iconFileName = tech.name.toLowerCase()
+                                .replace('.', '')
+                                .replace(/\s+/g, '');
                             console.log(`Fetching icon for ${tech.name}: ${iconFileName}.svg`);
                             const iconUrl = await storage.ref(`tech-stack/${iconFileName}.svg`)
                                 .getDownloadURL();
