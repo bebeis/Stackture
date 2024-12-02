@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 서비스 워커 등록
     if ('serviceWorker' in navigator) {
         try {
-            await navigator.serviceWorker.register('/service-worker.js');
+            const registration = await navigator.serviceWorker.register('/service-worker.js', {
+                scope: '/'
+            });
             console.log('Service Worker registered successfully');
         } catch (error) {
             console.error('Service Worker registration failed:', error);
