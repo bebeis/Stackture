@@ -30,6 +30,7 @@ export class Element {
   }
 
   static createFromData(data) {
-    throw new Error('createFromData method must be implemented');
+    // 기본적으로는 직접 생성할 수 없으므로 에러를 던집니다.
+    throw new Error('createFromData method must be implemented in subclass');
   }
 }

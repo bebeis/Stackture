@@ -102,7 +102,7 @@ export class ArrowElement extends Element {
       data.height,
       data.arrowType
     );
-    Object.assign(element, data);
+    element.isSelected = data.isSelected;
     return element;
   }
 

@@ -215,4 +215,66 @@ export class ElementManager {
       this.diagram.historyManager.saveState();
     }
   }
+
+  handleMouseUp(e) {
+    const pos = this.diagram.getMousePos(e);
+    const snappedPos = this.diagram.gridManager.snapToGrid(pos);
+
+    if (this.isDrawing) {
+      if (this.isWithinGrid(snappedPos)) {
+        const width = Math.abs(snappedPos.x - this.startPos.x);
+        const height = Math.abs(snappedPos.y - this.startPos.y);
+
+        if (width >= 10 || height >= 10) {
+          this.elementCreator.createNewElement(this.startPos, snappedPos);
+          this.diagram.historyManager.saveState();
+        }
+      }
+    } else if (this.isDragging || this.isResizing) {
+      this.diagram.historyManager.saveState();
+    } else if (this.selectionRectangle) {
+      this.elementSelector.selectElementsInRectangle(this.selectionRectangle);
+    }
+
+    this.isDragging = false;
+    this.isDrawing = false;
+    this.isResizing = false;
+    this.resizeHandle = null;
+    this.originalElements = [];
+    this.selectionRectangle = null;
+  }
+
+  deleteSelectedElements() {
+    if (this.selectedElements.length > 0) {
+      this.elements = this.elements.filter(
+        (el) => !this.selectedElements.includes(el)
+      );
+      this.selectedElements = [];
+      this.diagram.redraw();
+      this.diagram.historyManager.saveState();
+    }
+  }
+
+  copySelectedElements() {
+    if (this.selectedElements.length > 0) {
+      this.copiedElements = this.selectedElements.map(el => el.serialize());
+    }
+  }
+
+  pasteElements() {
+    if (this.copiedElements && this.copiedElements.length > 0) {
+      const newElements = this.copiedElements.map(data => {
+        const element = this.elementFactory.createElementFromData(data);
+        element.x += 10;
+        element.y += 10;
+        element.isSelected = true;
+        return element;
+      });
+
+      this.elements.push(...newElements);
+      this.selectedElements = newElements;
+      this.diagram.redraw();
+      this.diagram.historyManager.saveState();
+    }
+  }
 }

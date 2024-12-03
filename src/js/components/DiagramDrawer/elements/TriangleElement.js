@@ -61,6 +61,16 @@ export class TriangleElement extends Element {
     return s >= 0 && t >= 0 && s + t <= D;
   }
 
+  serialize() {
+    return super.serialize();
+  }
+
+  static createFromData(data) {
+    const element = new TriangleElement(data.x, data.y, data.width, data.height);
+    element.isSelected = data.isSelected;
+    return element;
+  }
+
   static register() {
     elementFactory.registerElement('shapes', TriangleElement.type, TriangleElement);
   }

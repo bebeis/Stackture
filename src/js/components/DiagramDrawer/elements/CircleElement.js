@@ -44,6 +44,16 @@ export class CircleElement extends Element {
     return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
   }
 
+  serialize() {
+    return super.serialize();
+  }
+
+  static createFromData(data) {
+    const element = new CircleElement(data.x, data.y, data.width, data.height);
+    element.isSelected = data.isSelected;
+    return element;
+  }
+
   static register() {
     elementFactory.registerElement('shapes', CircleElement.type, CircleElement);
   }

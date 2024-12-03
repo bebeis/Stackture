@@ -5,7 +5,7 @@ import { elementFactory } from './ElementFactory.js';
 
 export class RectangleElement extends Element {
   static type = 'rectangle';
-  static icon = '⬜';
+  static icon = '⬛';
   static title = 'Rectangle';
 
   constructor(x, y, width, height) {
@@ -33,8 +33,18 @@ export class RectangleElement extends Element {
     );
   }
 
+  serialize() {
+    return super.serialize();
+  }
+
+  static createFromData(data) {
+    const element = new RectangleElement(data.x, data.y, data.width, data.height);
+    element.isSelected = data.isSelected;
+    return element;
+  }
+
   static register() {
-    elementFactory.registerElement('shapes', 'rectangle', RectangleElement);
+    elementFactory.registerElement('shapes', RectangleElement.type, RectangleElement);
   }
 }
 

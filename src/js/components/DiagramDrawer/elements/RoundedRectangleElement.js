@@ -1,16 +1,16 @@
 // src/js/components/DiagramDrawer/elements/RoundedRectangleElement.js
-// 리팩토링하면서 새로운 요소 추가 시 얼마나 깔끔하게 코드가 작성되는지 체크하는 겸 추가함
+
 import { Element } from './Element.js';
 import { elementFactory } from './ElementFactory.js';
 
 export class RoundedRectangleElement extends Element {
   static type = 'roundedRect';
-  static icon = '🔲';
+  static icon = '◽';
   static title = 'Rounded Rectangle';
 
-  constructor(x, y, width, height) {
-    super('roundedRect', x, y, width, height);
-    this.borderRadius = 10;
+  constructor(x, y, width, height, borderRadius = 10) {
+    super(RoundedRectangleElement.type, x, y, width, height);
+    this.borderRadius = borderRadius;
   }
 
   draw(ctx) {
@@ -26,6 +26,7 @@ export class RoundedRectangleElement extends Element {
   }
 
   containsPoint(x, y) {
+    // 단순히 사각형 영역 내에 있는지 확인
     return (
       x >= this.x &&
       x <= this.x + this.width &&
@@ -34,8 +35,26 @@ export class RoundedRectangleElement extends Element {
     );
   }
 
+  serialize() {
+    const data = super.serialize();
+    data.borderRadius = this.borderRadius;
+    return data;
+  }
+
+  static createFromData(data) {
+    const element = new RoundedRectangleElement(
+      data.x,
+      data.y,
+      data.width,
+      data.height,
+      data.borderRadius
+    );
+    element.isSelected = data.isSelected;
+    return element;
+  }
+
   static register() {
-    elementFactory.registerElement('shapes', 'roundedRect', RoundedRectangleElement);
+    elementFactory.registerElement('shapes', RoundedRectangleElement.type, RoundedRectangleElement);
   }
 }
 

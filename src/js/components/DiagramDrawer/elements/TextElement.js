@@ -1,11 +1,13 @@
 // src/js/components/DiagramDrawer/elements/TextElement.js
+
 import { Element } from './Element.js';
 import { elementFactory } from './ElementFactory.js';
 
 export class TextElement extends Element {
-    static type = 'text';
-  static icon = '📝'; // 적절한 아이콘으로 변경
+  static type = 'text';
+  static icon = '📝';
   static title = 'Text';
+
   constructor(x, y, text, font = '16px Arial', color = '#000000') {
     super('text', x, y, 0, 0);
     this.text = text;
@@ -48,12 +50,27 @@ export class TextElement extends Element {
   }
 
   _getContext() {
-    // 임시 Canvas Context 생성
     const canvas = document.createElement('canvas');
     return canvas.getContext('2d');
   }
 
-  static register() {   
+  serialize() {
+    const baseData = super.serialize();
+    return {
+      ...baseData,
+      text: this.text,
+      font: this.font,
+      color: this.color,
+    };
+  }
+
+  static createFromData(data) {
+    const element = new TextElement(data.x, data.y, data.text, data.font, data.color);
+    element.isSelected = data.isSelected;
+    return element;
+  }
+
+  static register() {
     elementFactory.registerElement('text', 'text', TextElement);
   }
 }

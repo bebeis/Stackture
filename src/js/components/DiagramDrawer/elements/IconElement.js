@@ -1,8 +1,13 @@
 // src/js/components/DiagramDrawer/elements/IconElement.js
+
 import { Element } from './Element.js';
 import { elementFactory } from './ElementFactory.js';
 
 export class IconElement extends Element {
+  static type = 'icon';
+  static icon = '🖼️';
+  static title = 'Icon';
+
   constructor(x, y, width, height, icon, tech) {
     super('icon', x, y, width, height);
     this.icon = icon; // 이미지 객체 (Image 인스턴스)
@@ -27,6 +32,23 @@ export class IconElement extends Element {
       y >= this.y &&
       y <= this.y + this.height
     );
+  }
+
+  serialize() {
+    const baseData = super.serialize();
+    return {
+      ...baseData,
+      iconSrc: this.icon.src,
+      tech: this.tech,
+    };
+  }
+
+  static createFromData(data) {
+    const icon = new Image();
+    icon.src = data.iconSrc;
+    const element = new IconElement(data.x, data.y, data.width, data.height, icon, data.tech);
+    element.isSelected = data.isSelected;
+    return element;
   }
 
   static register() {

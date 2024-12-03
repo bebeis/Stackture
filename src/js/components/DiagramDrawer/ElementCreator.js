@@ -91,31 +91,33 @@ export class ElementCreator {
   finalizeTextInput() {
     if (this.isFinalizingText) return;
     this.isFinalizingText = true;
-
+  
     try {
       if (this.elementManager.textInput && this.elementManager.textInput.value.trim()) {
         const pos = {
           x: parseInt(this.elementManager.textInput.style.left),
           y: parseInt(this.elementManager.textInput.style.top)
         };
-
+  
         const text = this.elementManager.textInput.value.trim();
         const element = this.elementManager.elementFactory.createElement('text', pos.x, pos.y, text);
-
+  
         this.elementManager.elements.push(element);
-        this.elementManager.selectedElement = element;
+        element.isSelected = true;
+        this.elementManager.selectedElements = [element];
         this.elementManager.diagram.historyManager.saveState();
       }
-
+  
       if (this.elementManager.textInput && this.elementManager.textInput.parentNode) {
         this.elementManager.textInput.remove();
       }
       this.elementManager.textInput = null;
-
+  
       this.elementManager.diagram.setTool('select');
       this.elementManager.diagram.redraw();
     } finally {
       this.isFinalizingText = false;
     }
   }
+  
 }
