@@ -26,8 +26,25 @@ export class TextElement extends Element {
     const lineHeight = parseInt(this.font, 10) * 1.2;
     let yOffset = 0;
 
-    lines.forEach((line) => {
+    lines.forEach((line, index) => {
       ctx.fillText(line, this.x, this.y + yOffset);
+      // 편집 모드일 때 커서 그리기
+      if (this.isEditing) {
+        const currentLineLength = lines.slice(0, index).reduce((acc, line) => acc + line.length + 1, 0);
+        if (this.cursorPosition >= currentLineLength && this.cursorPosition <= currentLineLength + line.length) {
+          const textBeforeCursor = line.substring(0, this.cursorPosition - currentLineLength);
+          const cursorX = this.x + ctx.measureText(textBeforeCursor).width;
+          const cursorY = this.y + yOffset;
+          if (Math.floor(Date.now() / 500) % 2 === 0) {
+            ctx.beginPath();
+            ctx.moveTo(cursorX, cursorY);
+            ctx.lineTo(cursorX, cursorY + lineHeight);
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
       yOffset += lineHeight;
     });
 

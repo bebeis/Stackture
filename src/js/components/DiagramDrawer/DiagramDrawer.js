@@ -45,6 +45,10 @@ export class DiagramDrawer {
 
     // 초기 상태 저장
     this.historyManager.saveState();
+
+    // 애니메이션 프레임 추가
+    this.animationFrameId = null;
+    this.startAnimation();
   }
 
   initCanvas() {
@@ -124,6 +128,16 @@ export class DiagramDrawer {
             this.elementManager.deselectAll();
             this.redraw();
             break;
+
+          case 'Enter':
+            if (this.elementManager.selectedElements.length === 1) {
+              const selectedElement = this.elementManager.selectedElements[0];
+              if (selectedElement.type === 'text') {
+                e.preventDefault();
+                this.elementManager.elementCreator.startEditingTextElement(selectedElement);
+              }
+            }
+            break;
         }
       }
     });
@@ -184,5 +198,21 @@ export class DiagramDrawer {
       y: e.clientY - rect.top
     };
     return this.zoomManager.transformPoint(point.x, point.y);
+  }
+
+  startAnimation() {
+    const animate = () => {
+      if (this.elementManager.elementCreator.isTypingText) {
+        this.redraw();
+      }
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+    animate();
+  }
+
+  destroy() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
   }
 }

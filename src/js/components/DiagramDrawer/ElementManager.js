@@ -26,39 +26,49 @@ export class ElementManager {
     this.elementSelector = new ElementSelector(this);
     this.elementResizer = new ElementResizer(this);
     this.elementCreator = new ElementCreator(this);
+    this.diagram.canvas.addEventListener('dblclick', this.handleDoubleClick.bind(this));
+  }
+
+  handleDoubleClick(e) {
+    const pos = this.diagram.getMousePos(e);
+    const clickedElement = this.elementSelector.findElementAtPosition(pos);
+
+    if (clickedElement && clickedElement.type === 'text') {
+      this.elementCreator.startEditingTextElement(clickedElement);
+    }
   }
 
   
-// handleMouseDown 메서드 수정
-handleMouseDown(e) {
-  const pos = this.diagram.getMousePos(e);
-  const snappedPos = this.diagram.gridManager.snapToGrid(pos);
+  // handleMouseDown 메서드 수정
+  handleMouseDown(e) {
+    const pos = this.diagram.getMousePos(e);
+    const snappedPos = this.diagram.gridManager.snapToGrid(pos);
 
-  if (this.elementCreator.isTypingText) {
-    // 텍스트 입력 중일 때, 클릭한 위치가 현재 텍스트 요소 밖이면 텍스트 입력 완료
-    if (
-      !this.elementCreator.activeTextElement.containsPoint(pos.x, pos.y)
-    ) {
-      this.elementCreator.finalizeTextInput();
+    if (this.elementCreator.isTypingText) {
+      // 텍스트 입력 중일 때, 클릭한 위치가 현재 텍스트 요소 밖이면 텍스트 입력 완료
+      if (
+        !this.elementCreator.activeTextElement.containsPoint(pos.x, pos.y)
+      ) {
+        this.elementCreator.finalizeTextInput();
+      }
+      return;
     }
-    return;
+
+    switch (this.diagram.currentTool) {
+      case 'select':
+        this.elementSelector.handleSelectMouseDown(e, pos);
+        break;
+
+      case 'text':
+        this.elementCreator.startTextInput(snappedPos);
+        break;
+
+      default:
+        this.isDrawing = true;
+        this.startPos = snappedPos;
+        break;
+    }
   }
-
-  switch (this.diagram.currentTool) {
-    case 'select':
-      this.elementSelector.handleSelectMouseDown(e, pos);
-      break;
-
-    case 'text':
-      this.elementCreator.startTextInput(snappedPos);
-      break;
-
-    default:
-      this.isDrawing = true;
-      this.startPos = snappedPos;
-      break;
-  }
-}
 
   handleMouseMove(e) {
     const pos = this.diagram.getMousePos(e);

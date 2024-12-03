@@ -68,9 +68,31 @@ export class ElementCreator {
     this.elementManager.elements.push(this.activeTextElement);
     this.elementManager.selectedElements = [this.activeTextElement];
     this.elementManager.diagram.redraw();
+    this.activeTextElement.cursorPosition = this.textInput.value.length;
+
   }
 
-  createHiddenTextInput(pos) {
+  startEditingTextElement(textElement) {
+    if (this.isTypingText) {
+      this.finalizeTextInput();
+    }
+
+    this.isTypingText = true;
+    this.activeTextElement = textElement;
+    this.activeTextElement.isEditing = true;
+
+    // 기존의 텍스트를 textarea에 설정
+    this.createHiddenTextInput({ x: textElement.x, y: textElement.y }, textElement.text);
+
+    this.elementManager.diagram.redraw();
+
+    this.textInput.selectionStart = this.textInput.value.length;
+    this.textInput.selectionEnd = this.textInput.value.length;
+    this.activeTextElement.cursorPosition = this.textInput.selectionStart;
+  }
+
+
+  createHiddenTextInput(pos, existingText = '') {
     // 기존의 textarea 제거
     if (this.textInput && this.textInput.parentNode) {
       this.textInput.parentNode.removeChild(this.textInput);
@@ -90,7 +112,7 @@ export class ElementCreator {
     this.textInput.style.outline = 'none';
     this.textInput.style.padding = '0';
     this.textInput.style.margin = '0';
-
+    this.textInput.value = existingText;
     document.body.appendChild(this.textInput);
 
     // this.textInput.focus();
@@ -101,17 +123,38 @@ export class ElementCreator {
 
     this.textInput.addEventListener('input', this.handleInput);
     this.textInput.addEventListener('keydown', this.handleKeyDown);
+    this.textInput.addEventListener('select', (e) => {
+      if (this.activeTextElement) {
+        this.activeTextElement.cursorPosition = this.textInput.selectionStart;
+        this.elementManager.diagram.redraw();
+      }
+    });
+
+    this.textInput.addEventListener('keyup', (e) => {
+      if (this.activeTextElement) {
+        this.activeTextElement.cursorPosition = this.textInput.selectionStart;
+        this.elementManager.diagram.redraw();
+      }
+    });
 
     // 포커스 설정
     setTimeout(() => {
       this.textInput.focus();
+      this.textInput.setSelectionRange(
+        existingText.length,
+        existingText.length
+      );
     }, 0);
+
+    return this.textInput;
   }
 
   handleInput(e) {
     if (!this.isTypingText || !this.activeTextElement) return;
 
+
     this.activeTextElement.text = this.textInput.value;
+    this.activeTextElement.cursorPosition = this.textInput.selectionStart; // 커서 위치 업데이트
     this.elementManager.diagram.redraw();
   }
 
