@@ -28,25 +28,37 @@ export class ElementManager {
     this.elementCreator = new ElementCreator(this);
   }
 
-  handleMouseDown(e) {
-    const pos = this.diagram.getMousePos(e);
-    const snappedPos = this.diagram.gridManager.snapToGrid(pos);
+  
+// handleMouseDown 메서드 수정
+handleMouseDown(e) {
+  const pos = this.diagram.getMousePos(e);
+  const snappedPos = this.diagram.gridManager.snapToGrid(pos);
 
-    switch (this.diagram.currentTool) {
-      case 'select':
-        this.elementSelector.handleSelectMouseDown(e, pos);
-        break;
-
-      case 'text':
-        this.elementCreator.startTextInput(snappedPos);
-        break;
-
-      default:
-        this.isDrawing = true;
-        this.startPos = snappedPos;
-        break;
+  if (this.elementCreator.isTypingText) {
+    // 텍스트 입력 중일 때, 클릭한 위치가 현재 텍스트 요소 밖이면 텍스트 입력 완료
+    if (
+      !this.elementCreator.activeTextElement.containsPoint(pos.x, pos.y)
+    ) {
+      this.elementCreator.finalizeTextInput();
     }
+    return;
   }
+
+  switch (this.diagram.currentTool) {
+    case 'select':
+      this.elementSelector.handleSelectMouseDown(e, pos);
+      break;
+
+    case 'text':
+      this.elementCreator.startTextInput(snappedPos);
+      break;
+
+    default:
+      this.isDrawing = true;
+      this.startPos = snappedPos;
+      break;
+  }
+}
 
   handleMouseMove(e) {
     const pos = this.diagram.getMousePos(e);
@@ -124,6 +136,11 @@ export class ElementManager {
   }
 
   updateCursor(pos) {
+    if (this.elementCreator.isTypingText) {
+      this.diagram.canvas.style.cursor = 'text';
+      return;
+    }
+
     if (this.diagram.currentTool === 'select') {
       if (this.selectedElements.length > 0) {
         const handle = this.elementResizer.getResizeHandle(pos, this.selectedElements);

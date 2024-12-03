@@ -10,9 +10,10 @@ export class TextElement extends Element {
 
   constructor(x, y, text, font = '16px Arial', color = '#000000') {
     super('text', x, y, 0, 0);
-    this.text = text;
+    this.text = text || '';
     this.font = font;
     this.color = color;
+    this.isEditing = false;
   }
 
   draw(ctx) {
@@ -20,32 +21,44 @@ export class TextElement extends Element {
     ctx.font = this.font;
     ctx.fillStyle = this.color;
     ctx.textBaseline = 'top';
-    ctx.fillText(this.text, this.x, this.y);
 
-    if (this.isSelected) {
-      const metrics = ctx.measureText(this.text);
-      const textWidth = metrics.width;
-      const textHeight = parseInt(this.font, 10);
+    const lines = this.text.split('\n');
+    const lineHeight = parseInt(this.font, 10) * 1.2;
+    let yOffset = 0;
+
+    lines.forEach((line) => {
+      ctx.fillText(line, this.x, this.y + yOffset);
+      yOffset += lineHeight;
+    });
+
+    if (this.isSelected || this.isEditing) {
+      // 텍스트의 너비와 높이 계산
+      const metrics = lines.map((line) => ctx.measureText(line).width);
+      const textWidth = Math.max(...metrics);
+      const textHeight = lines.length * lineHeight;
 
       ctx.strokeStyle = '#2196f3';
       ctx.lineWidth = 1;
-      ctx.strokeRect(this.x, this.y, textWidth, textHeight);
+      ctx.strokeRect(this.x - 2, this.y - 2, textWidth + 4, textHeight + 4);
     }
+
     ctx.restore();
   }
 
   containsPoint(x, y) {
     const ctx = this._getContext();
     ctx.font = this.font;
-    const metrics = ctx.measureText(this.text);
-    const textWidth = metrics.width;
-    const textHeight = parseInt(this.font, 10);
+    const lines = this.text.split('\n');
+    const lineHeight = parseInt(this.font, 10) * 1.2;
+    const metrics = lines.map((line) => ctx.measureText(line).width);
+    const textWidth = Math.max(...metrics);
+    const textHeight = lines.length * lineHeight;
 
     return (
-      x >= this.x &&
-      x <= this.x + textWidth &&
-      y >= this.y &&
-      y <= this.y + textHeight
+      x >= this.x - 2 &&
+      x <= this.x + textWidth + 2 &&
+      y >= this.y - 2 &&
+      y <= this.y + textHeight + 2
     );
   }
 

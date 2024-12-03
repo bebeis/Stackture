@@ -72,6 +72,9 @@ export class DiagramDrawer {
 
     // 키보드 이벤트 리스너
     document.addEventListener('keydown', (e) => {
+      if (this.elementManager.elementCreator.isTypingText) {
+        return;
+      }
       // Shift 키 상태 관리
       if (e.key === 'Shift') {
         this.isShiftPressed = true;

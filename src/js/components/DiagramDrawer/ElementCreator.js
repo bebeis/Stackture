@@ -2,7 +2,9 @@
 export class ElementCreator {
   constructor(elementManager) {
     this.elementManager = elementManager;
-    this.isFinalizingText = false;
+    this.isTypingText = false;
+    this.activeTextElement = null;
+    this.textInput = null;
   }
 
   createNewElement(start, end) {
@@ -49,75 +51,134 @@ export class ElementCreator {
     this.elementManager.diagram.setTool('select');
     this.elementManager.diagram.redraw();
   }
-
   startTextInput(pos) {
-    if (this.elementManager.textInput) {
+    // 기존 텍스트 입력이 진행 중이면 완료 처리
+    if (this.isTypingText) {
       this.finalizeTextInput();
     }
 
-    this.elementManager.textInput = document.createElement('textarea');
-    this.elementManager.textInput.classList.add('text-input');
-    this.elementManager.textInput.style.left = `${pos.x}px`;
-    this.elementManager.textInput.style.top = `${pos.y}px`;
-    this.elementManager.textInput.style.position = 'absolute';
-    this.elementManager.textInput.style.minWidth = '100px';
-    this.elementManager.textInput.style.minHeight = '24px';
-    this.elementManager.textInput.style.padding = '4px';
-    this.elementManager.textInput.style.border = '1px solid #2196f3';
-    this.elementManager.textInput.style.outline = 'none';
-    this.elementManager.textInput.style.resize = 'both';
-    this.elementManager.textInput.style.overflow = 'hidden';
-    this.elementManager.textInput.style.backgroundColor = 'white';
-    this.elementManager.textInput.style.zIndex = '1000';
+    this.isTypingText = true;
 
-    this.elementManager.diagram.canvas.parentElement.appendChild(this.elementManager.textInput);
+    // 숨겨진 textarea 생성
+    this.createHiddenTextInput(pos);
 
+    // 새로운 TextElement 생성 및 활성화
+    this.activeTextElement = this.elementManager.elementFactory.createElement('text', pos.x, pos.y, '');
+    this.activeTextElement.isEditing = true;
+    this.elementManager.elements.push(this.activeTextElement);
+    this.elementManager.selectedElements = [this.activeTextElement];
+    this.elementManager.diagram.redraw();
+  }
+
+  createHiddenTextInput(pos) {
+    // 기존의 textarea 제거
+    if (this.textInput && this.textInput.parentNode) {
+      this.textInput.parentNode.removeChild(this.textInput);
+    }
+
+    this.textInput = document.createElement('textarea');
+    this.textInput.style.position = 'absolute';
+    this.textInput.style.left = `${pos.x}px`;
+    this.textInput.style.top = `${pos.y}px`;
+    this.textInput.style.opacity = '0.01';
+    this.textInput.style.height = '1px';
+    this.textInput.style.width = '1px';
+    this.textInput.style.zIndex = '1000';
+    this.textInput.style.overflow = 'hidden';
+    this.textInput.style.resize = 'none';
+    this.textInput.style.border = 'none';
+    this.textInput.style.outline = 'none';
+    this.textInput.style.padding = '0';
+    this.textInput.style.margin = '0';
+
+    document.body.appendChild(this.textInput);
+
+    // this.textInput.focus();
+
+    // 입력 이벤트 처리
+    this.handleInput = this.handleInput.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+
+    this.textInput.addEventListener('input', this.handleInput);
+    this.textInput.addEventListener('keydown', this.handleKeyDown);
+
+    // 포커스 설정
     setTimeout(() => {
-      this.elementManager.textInput.focus();
+      this.textInput.focus();
     }, 0);
+  }
 
-    this.elementManager.textInput.addEventListener('blur', () => {
+  handleInput(e) {
+    if (!this.isTypingText || !this.activeTextElement) return;
+
+    this.activeTextElement.text = this.textInput.value;
+    this.elementManager.diagram.redraw();
+  }
+
+  handleKeyDown(e) {
+    if (!this.isTypingText || !this.activeTextElement) return;
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+      // Enter 키로 텍스트 입력 완료
+      e.preventDefault();
       this.finalizeTextInput();
-    });
-
-    this.elementManager.textInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        this.finalizeTextInput();
-      }
-    });
+    } else if (e.key === 'Escape') {
+      // Escape 키로 텍스트 입력 취소
+      e.preventDefault();
+      this.cancelTextInput();
+    }
   }
 
   finalizeTextInput() {
-    if (this.isFinalizingText) return;
-    this.isFinalizingText = true;
-  
-    try {
-      if (this.elementManager.textInput && this.elementManager.textInput.value.trim()) {
-        const pos = {
-          x: parseInt(this.elementManager.textInput.style.left),
-          y: parseInt(this.elementManager.textInput.style.top)
-        };
-  
-        const text = this.elementManager.textInput.value.trim();
-        const element = this.elementManager.elementFactory.createElement('text', pos.x, pos.y, text);
-  
-        this.elementManager.elements.push(element);
-        element.isSelected = true;
-        this.elementManager.selectedElements = [element];
-        this.elementManager.diagram.historyManager.saveState();
+    if (!this.isTypingText || !this.activeTextElement) return;
+
+    // 텍스트 입력 완료 처리
+    this.activeTextElement.isEditing = false;
+    this.activeTextElement.isSelected = true;
+    this.elementManager.selectedElements = [this.activeTextElement];
+    this.elementManager.diagram.historyManager.saveState();
+
+    // 이벤트 리스너 제거 및 textarea 삭제
+    this.cleanupTextInput();
+
+    this.isTypingText = false;
+    this.activeTextElement = null;
+
+    // 도구를 select로 변경
+    this.elementManager.diagram.setTool('select');
+    this.elementManager.diagram.redraw();
+  }
+
+  cancelTextInput() {
+    if (!this.isTypingText || !this.activeTextElement) return;
+
+    // 텍스트 입력 취소 처리
+    // 요소 목록에서 제거
+    const index = this.elementManager.elements.indexOf(this.activeTextElement);
+    if (index !== -1) {
+      this.elementManager.elements.splice(index, 1);
+    }
+
+    // 이벤트 리스너 제거 및 textarea 삭제
+    this.cleanupTextInput();
+
+    this.activeTextElement = null;
+    this.isTypingText = false;
+
+    // 도구를 select로 변경
+    this.elementManager.diagram.setTool('select');
+    this.elementManager.diagram.redraw();
+  }
+
+  cleanupTextInput() {
+    if (this.textInput) {
+      this.textInput.removeEventListener('input', this.handleInput);
+      this.textInput.removeEventListener('keydown', this.handleKeyDown);
+      if (this.textInput.parentNode) {
+        this.textInput.parentNode.removeChild(this.textInput);
       }
-  
-      if (this.elementManager.textInput && this.elementManager.textInput.parentNode) {
-        this.elementManager.textInput.remove();
-      }
-      this.elementManager.textInput = null;
-  
-      this.elementManager.diagram.setTool('select');
-      this.elementManager.diagram.redraw();
-    } finally {
-      this.isFinalizingText = false;
+      this.textInput = null;
     }
   }
-  
+ 
 }
