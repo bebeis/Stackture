@@ -58,11 +58,28 @@ export class TechStackService {
 
     async getTechStacks() {
         try {
+            // 세션 스토리지에서 데이터 확인
+            const cachedData = sessionStorage.getItem('techStacksData');
+            const loadingOverlay = document.querySelector('.loading-overlay');
+            
+            if (cachedData) {
+                console.log('캐시된 데이터 사용');
+                return JSON.parse(cachedData);
+            }
+
+            // 캐시된 데이터가 없을 경우에만 로딩 오버레이 표시
+            loadingOverlay.style.display = 'flex';
+            
             console.log('기술 스택 데이터 가져오기 시작...');
             const techStacks = await this.fetchTechStacks();
+            
+            // 데이터를 세션 스토리지에 저장
+            sessionStorage.setItem('techStacksData', JSON.stringify(techStacks));
+            
             console.log('이미지 프리로딩 시작...');
             await this.preloadImages(techStacks);
             console.log('기술 스택 데이터 처리 완료');
+            
             return techStacks;
         } catch (error) {
             console.error('기술 스택 가져오기 실패:', error);
@@ -75,34 +92,42 @@ export class TechStackService {
         const loadingOverlay = document.querySelector('.loading-overlay');
         
         try {
-            // 세션 스토리지에 캐시된 이미지가 있는지 확인
-            const cachedImages = techStacks.every(tech => 
-                sessionStorage.getItem(tech.icon)
+            // 세션 스토리지에 이미지가 모두 캐시되어 있는지 확인
+            const allImagesLoaded = techStacks.every(tech => 
+                sessionStorage.getItem(`image_${tech.icon}`)
             );
 
-            // 모든 이미지가 캐시되어 있다면 로딩 오버레이 즉시 제거
-            if (cachedImages) {
+            if (allImagesLoaded) {
                 loadingOverlay.style.display = 'none';
                 return;
             }
 
-            console.log('이미지 프리로딩 시작...');
-            const preloadPromises = techStacks.map(tech => this.preloadImage(tech.icon));
+            const preloadPromises = techStacks.map(async tech => {
+                if (!sessionStorage.getItem(`image_${tech.icon}`)) {
+                    const img = await this.preloadImage(tech.icon);
+                    // 이미지를 Data URL로 변환하여 세션 스토리지에 저장
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const dataUrl = canvas.toDataURL('image/png');
+                    sessionStorage.setItem(`image_${tech.icon}`, dataUrl);
+                }
+            });
+
             await Promise.all(preloadPromises);
-            console.log('이미지 프리로딩 완료');
             
             loadingOverlay.style.transition = 'opacity 0.5s ease-in-out';
             loadingOverlay.style.opacity = '0';
             
             setTimeout(() => {
-                loadingOverlay.remove();
+                loadingOverlay.style.display = 'none';
             }, 500);
             
         } catch (error) {
             console.error('이미지 프리로딩 실패:', error);
-            if (loadingOverlay) {
-                loadingOverlay.remove();
-            }
+            loadingOverlay.style.display = 'none';
         }
     }
 
