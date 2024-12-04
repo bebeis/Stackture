@@ -27,6 +27,9 @@ export class ToolbarManager {
       { id: 'shapes', icon: '⬜', title: 'Shapes' },
       { id: 'arrows', icon: '➡️', title: 'Arrows' },
       { id: 'text', icon: 'T', title: 'Text' },
+      { id: 'cut', icon: '✂️', title: '잘라내기 (Ctrl+X)' },
+      { id: 'copy', icon: '📋', title: '복사 (Ctrl+C)' },
+      { id: 'paste', icon: '📎', title: '붙여넣기 (Ctrl+V)' },
     ];
 
     tools.forEach((tool) => this.createToolButton(tool));
@@ -42,16 +45,29 @@ export class ToolbarManager {
     button.dataset.tool = tool.id;
 
     button.addEventListener('click', () => {
-      if (tool.id === 'shapes') {
-        this.toggleShapesSubmenu(button);
-        this.hideArrowsSubmenu();
-      } else if (tool.id === 'arrows') {
-        this.toggleArrowsSubmenu(button);
-        this.hideShapesSubmenu();
-      } else {
-        this.diagram.setTool(tool.id);
-        this.hideSubmenus();
-        this.updateToolbarState(button);
+      switch (tool.id) {
+        case 'shapes':
+          this.toggleShapesSubmenu(button);
+          this.hideArrowsSubmenu();
+          break;
+        case 'arrows':
+          this.toggleArrowsSubmenu(button);
+          this.hideShapesSubmenu();
+          break;
+        case 'cut':
+          this.diagram.elementManager.copySelectedElements();
+          this.diagram.elementManager.deleteSelectedElements();
+          break;
+        case 'copy':
+          this.diagram.elementManager.copySelectedElements();
+          break;
+        case 'paste':
+          this.diagram.elementManager.pasteElements();
+          break;
+        default:
+          this.diagram.setTool(tool.id);
+          this.hideSubmenus();
+          this.updateToolbarState(button);
       }
     });
 

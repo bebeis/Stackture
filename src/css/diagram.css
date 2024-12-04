@@ -330,3 +330,9 @@
   90% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -20px); }
 }
+
+.drawing-toolbar button[data-tool="cut"] {
+  margin-left: 10px;
+  border-left: 1px solid #ccc;
+  padding-left: 10px;
+}
