@@ -161,14 +161,34 @@ export class ElementCreator {
   handleKeyDown(e) {
     if (!this.isTypingText || !this.activeTextElement) return;
 
-    if (e.key === 'Enter' && !e.shiftKey) {
-      // Enter 키로 텍스트 입력 완료
+    if (e.key === 'Enter' && e.shiftKey) {
+      // Shift + Enter로 텍스트 입력 완료
       e.preventDefault();
       this.finalizeTextInput();
-    } else if (e.key === 'Escape') {
-      // Escape 키로 텍스트 입력 취소
+    } else if (e.key === 'Enter') {
+      // Enter로 개행 처리
       e.preventDefault();
-      this.cancelTextInput();
+      const cursorPos = this.textInput.selectionStart;
+      const text = this.textInput.value;
+      
+      // 한글 입력 중인지 확인
+      if (e.isComposing) {
+        return;
+      }
+      
+      const newText = text.slice(0, cursorPos) + '\n' + text.slice(this.textInput.selectionEnd);
+      this.textInput.value = newText;
+      this.textInput.selectionStart = cursorPos + 1;
+      this.textInput.selectionEnd = cursorPos + 1;
+      this.handleInput();
+    } else if (e.key === 'Escape') {
+      // Escape 키로 현재까지의 텍스트로 완료
+      e.preventDefault();
+      if (this.textInput.value.trim()) {
+        this.finalizeTextInput();
+      } else {
+        this.cancelTextInput();
+      }
     }
   }
 
