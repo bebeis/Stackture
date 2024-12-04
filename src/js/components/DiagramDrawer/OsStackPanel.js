@@ -82,12 +82,19 @@ export class OsStackPanel {
       try {
         const data = JSON.parse(e.dataTransfer.getData('application/json'));
         if (data.type === 'os-stack') {
+          // 기존 선택 요소들 선택 해제
+          this.diagram.elementManager.selectedElements.forEach(el => {
+            el.isSelected = false;
+          });
+          this.diagram.elementManager.selectedElements = [];
+          
           const os = this.osStacks.find(o => o.id === data.id);
           if (os) {
             const pos = this.diagram.getMousePos(e);
             const snappedPos = this.diagram.gridManager.snapToGrid(pos);
             this.createOsStackElement(os, snappedPos);
           }
+          this.diagram.redraw(); // 화면 갱신 추가
         }
       } catch (err) {
         console.error('드롭 처리 중 오류 발생:', err);

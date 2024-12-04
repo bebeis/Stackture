@@ -81,12 +81,19 @@ export class CommonStackPanel {
       try {
         const data = JSON.parse(e.dataTransfer.getData('application/json'));
         if (data.type === 'common-stack') {
+          // 기존 선택 요소들 선택 해제
+          this.diagram.elementManager.selectedElements.forEach(el => {
+            el.isSelected = false;
+          });
+          this.diagram.elementManager.selectedElements = [];
+          
           const common = this.commonStacks.find(c => c.id === data.id);
           if (common) {
             const pos = this.diagram.getMousePos(e);
             const snappedPos = this.diagram.gridManager.snapToGrid(pos);
             this.createCommonStackElement(common, snappedPos);
           }
+          this.diagram.redraw(); // 화면 갱신 추가
         }
       } catch (err) {
         console.error('드롭 처리 중 오류 발생:', err);
