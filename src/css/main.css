@@ -340,3 +340,73 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.nav-menu a:hover {
+    background-color: #f1f5ff;
+    color: #0066ff;
+}
+
+.nav-menu .github-link {
+    margin-left: 1rem;
+}
+
+.content-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 3rem;
+}
+
+.intro-section, .guide-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.intro-section h2, .guide-section h2 {
+    color: #0066ff;
+    margin-bottom: 1.5rem;
+}
+
+.intro-section h3, .guide-section h3 {
+    color: #333;
+    margin: 1.5rem 0 1rem;
+}
+
+.intro-section p, .guide-section p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.intro-section ul, .guide-section ol {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.intro-section li, .guide-section li {
+    margin-bottom: 1rem;
+    color: #666;
+    line-height: 1.6;
+}
