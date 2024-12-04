@@ -243,5 +243,23 @@ export class ElementCreator {
       this.textInput = null;
     }
   }
- 
+
+  async createIconElement(tech, pos) {
+    try {
+      const icon = await this.elementManager.diagram.imageCache.getImage(tech.icon);
+      if (!icon) return null;
+
+      const element = new IconElement(pos.x - 24, pos.y - 24, 48, 48, icon, tech);
+      this.elementManager.elements.push(element);
+      element.isSelected = true;
+      this.elementManager.selectedElements = [element];
+      this.elementManager.diagram.redraw();
+      this.elementManager.diagram.historyManager.saveState();
+      
+      return element;
+    } catch (error) {
+      console.error('아이콘 생성 실패:', error);
+      return null;
+    }
+  }
 }

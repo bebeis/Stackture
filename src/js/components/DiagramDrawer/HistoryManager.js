@@ -4,44 +4,95 @@ export class HistoryManager {
     this.history = [];
     this.redoStack = [];
     this.maxHistorySize = 50;
+    this.imageCache = new Map();
   }
 
   saveState() {
     const currentState = {
-      elements: this.diagram.elementManager.elements.map(el => el.serialize()),
+      elements: this.diagram.elementManager.elements.map(el => {
+        const serialized = el.serialize();
+        if (el.type === 'icon' && el.icon) {
+          const iconSrc = el.icon.src;
+          if (!this.imageCache.has(iconSrc)) {
+            this.imageCache.set(iconSrc, el.icon);
+          }
+        }
+        return serialized;
+      }),
       selectedElements: this.diagram.elementManager.selectedElements.map(el =>
         this.diagram.elementManager.elements.indexOf(el)
       ),
     };
 
     this.history.push(currentState);
-    if (this.history.length > this.maxHistorySize) this.history.shift();
+    if (this.history.length > this.maxHistorySize) {
+      const removedState = this.history.shift();
+      this.cleanupImageCache(removedState);
+    }
     this.redoStack = [];
   }
 
   restoreElements(elementDataArray) {
-    return elementDataArray.map(data => {
+    const elements = [];
+    const loadPromises = [];
+
+    elementDataArray.forEach(data => {
       const element = this.diagram.elementManager.elementFactory.createElementFromData(data);
       
       if (element.type === 'icon' && data.iconSrc) {
-        const icon = new Image();
-        icon.crossOrigin = 'anonymous';
-        icon.src = data.iconSrc;
-        element.icon = icon;
-        
-        // 이미지가 로드되면 캔버스 다시 그리기
-        icon.onload = () => {
-          this.diagram.redraw();
-        };
+        const cachedImage = this.imageCache.get(data.iconSrc);
+        if (cachedImage) {
+          element.icon = cachedImage;
+          element.isImageLoaded = true;
+        } else {
+          const loadPromise = new Promise((resolve) => {
+            const icon = new Image();
+            icon.crossOrigin = 'anonymous';
+            icon.onload = () => {
+              element.icon = icon;
+              element.isImageLoaded = true;
+              this.imageCache.set(data.iconSrc, icon);
+              this.diagram.redraw();
+              resolve();
+            };
+            icon.src = data.iconSrc;
+          });
+          loadPromises.push(loadPromise);
+        }
       }
       
       element.isSelected = data.isSelected;
-      return element;
+      elements.push(element);
     });
+
+    if (loadPromises.length > 0) {
+      Promise.all(loadPromises).then(() => {
+        this.diagram.redraw();
+      });
+    }
+
+    return elements;
+  }
+
+  cleanupImageCache(state) {
+    const activeUrls = new Set();
+    this.history.forEach(historyState => {
+      historyState.elements.forEach(el => {
+        if (el.iconSrc) {
+          activeUrls.add(el.iconSrc);
+        }
+      });
+    });
+
+    for (const [url, _] of this.imageCache) {
+      if (!activeUrls.has(url)) {
+        this.imageCache.delete(url);
+      }
+    }
   }
 
   undo() {
-    if (this.history.length > 1) { // 초기 상태를 유지하기 위해 1보다 클 때만 undo
+    if (this.history.length > 1) {
       const currentState = this.history.pop();
       this.redoStack.push(currentState);
 
@@ -77,7 +128,7 @@ export class HistoryManager {
 
   getHistorySize() {
     return {
-      undo: this.history.length - 1, // 초기 상태 제외
+      undo: this.history.length - 1,
       redo: this.redoStack.length
     };
   }

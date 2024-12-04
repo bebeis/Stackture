@@ -10,6 +10,7 @@ import { TechStackPanel } from './TechStackPanel.js';
 import { SaveLoadManager } from './SaveLoadManager.js';
 import { OsStackPanel } from './OsStackPanel.js';
 import { CommonStackPanel } from './CommonStackPanel.js';
+import { ImageCache } from './ImageCache.js';
 
 export class DiagramDrawer {
   constructor(container, techStacks) {
@@ -55,6 +56,8 @@ export class DiagramDrawer {
     // 애니메이션 프레임 추가
     this.animationFrameId = null;
     this.startAnimation();
+
+    this.imageCache = new ImageCache();
   }
 
   initCanvas() {

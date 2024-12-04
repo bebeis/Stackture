@@ -10,11 +10,21 @@ export class IconElement extends Element {
 
   constructor(x, y, width, height, icon, tech) {
     super('icon', x, y, width, height);
-    this.icon = icon; // 이미지 객체 (Image 인스턴스)
-    this.tech = tech; // 기술 스택 정보 (선택 사항)
+    this.icon = icon;
+    this.tech = tech;
+    this.isImageLoaded = icon.complete;
   }
 
   draw(ctx) {
+    if (!this.isImageLoaded) {
+      // 이미지가 로드되지 않은 경우 로딩 표시
+      ctx.save();
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(this.x, this.y, this.width, this.height);
+      ctx.restore();
+      return;
+    }
+
     ctx.save();
     ctx.drawImage(this.icon, this.x, this.y, this.width, this.height);
     if (this.isSelected) {

@@ -204,122 +204,58 @@ export class ElementManager {
   }
 
   pasteElements() {
-    if (this.copiedElements && this.copiedElements.length > 0) {
-      // 기존 선택된 요소들의 선택 상태를 해제
-      this.selectedElements.forEach(el => {
-        el.isSelected = false;
-      });
+    if (!this.copiedElements || this.copiedElements.length === 0) return;
+
+    // 기존 선택된 요소들의 선택 상태 해제
+    this.selectedElements.forEach(el => {
+      el.isSelected = false;
+    });
+    
+    const newElements = [];
+    const loadPromises = [];
+    
+    this.copiedElements.forEach(data => {
+      const element = this.elementFactory.createElementFromData(data);
+      element.x += 10;
+      element.y += 10;
+      element.isSelected = true;
       
-      const newElements = [];
-      
-      this.copiedElements.forEach(data => {
-        const element = this.elementFactory.createElementFromData(data);
-        element.x += 10;
-        element.y += 10;
-        element.isSelected = true;
-        
-        if (element.type === 'icon') {
-          const icon = new Image();
-          icon.crossOrigin = 'anonymous';
-          icon.src = data.iconSrc;
-          icon.onload = () => {
-            element.icon = icon;
-            this.diagram.redraw();
-          };
-        }
-        
-        newElements.push(element);
-      });
-
-      this.elements.push(...newElements);
-      this.selectedElements = newElements;
-      this.diagram.redraw();
-      this.diagram.historyManager.saveState();
-    }
-  }
-
-  handleMouseUp(e) {
-    const pos = this.diagram.getMousePos(e);
-    const snappedPos = this.diagram.gridManager.snapToGrid(pos);
-
-    if (this.isDrawing) {
-      if (this.isWithinGrid(snappedPos)) {
-        const width = Math.abs(snappedPos.x - this.startPos.x);
-        const height = Math.abs(snappedPos.y - this.startPos.y);
-
-        if (width >= 10 || height >= 10) {
-          this.elementCreator.createNewElement(this.startPos, snappedPos);
-          this.diagram.historyManager.saveState();
+      if (element.type === 'icon' && data.iconSrc) {
+        // 이미지 캐시 확인
+        const cachedImage = this.diagram.historyManager.imageCache.get(data.iconSrc);
+        if (cachedImage) {
+          element.icon = cachedImage;
+          element.isImageLoaded = true;
+        } else {
+          // 새 이미지 로드
+          const loadPromise = new Promise((resolve) => {
+            const icon = new Image();
+            icon.crossOrigin = 'anonymous';
+            icon.onload = () => {
+              element.icon = icon;
+              element.isImageLoaded = true;
+              this.diagram.historyManager.imageCache.set(data.iconSrc, icon);
+              resolve();
+            };
+            icon.src = data.iconSrc;
+          });
+          loadPromises.push(loadPromise);
         }
       }
-    } else if (this.isDragging || this.isResizing) {
-      this.diagram.historyManager.saveState();
-    } else if (this.selectionRectangle) {
-      this.elementSelector.selectElementsInRectangle(this.selectionRectangle);
-    }
-
-    this.isDragging = false;
-    this.isDrawing = false;
-    this.isResizing = false;
-    this.resizeHandle = null;
-    this.originalElements = [];
-    this.selectionRectangle = null;
-  }
-
-  deleteSelectedElements() {
-    if (this.selectedElements.length > 0) {
-      this.elements = this.elements.filter(
-        (el) => !this.selectedElements.includes(el)
-      );
-      this.selectedElements = [];
-      this.diagram.redraw();
-      this.diagram.historyManager.saveState();
-    }
-  }
-
-  copySelectedElements() {
-    if (this.selectedElements.length > 0) {
-      this.copiedElements = this.selectedElements.map(el => {
-        const serializedData = el.serialize();
-        if (el.type === 'icon' && el.icon) {
-          serializedData.iconSrc = el.icon.src;
-          serializedData.tech = el.tech;
-        }
-        return serializedData;
-      });
-    }
-  }
-
-  pasteElements() {
-    if (this.copiedElements && this.copiedElements.length > 0) {
-      // 기존 선택된 요소들의 선택 상태를 해제
-      this.selectedElements.forEach(el => {
-        el.isSelected = false;
-      });
       
-      const newElements = [];
-      
-      this.copiedElements.forEach(data => {
-        const element = this.elementFactory.createElementFromData(data);
-        element.x += 10;
-        element.y += 10;
-        element.isSelected = true;
-        
-        if (element.type === 'icon') {
-          const icon = new Image();
-          icon.crossOrigin = 'anonymous';
-          icon.src = data.iconSrc;
-          icon.onload = () => {
-            element.icon = icon;
-            this.diagram.redraw();
-          };
-        }
-        
-        newElements.push(element);
-      });
+      newElements.push(element);
+    });
 
-      this.elements.push(...newElements);
-      this.selectedElements = newElements;
+    this.elements.push(...newElements);
+    this.selectedElements = newElements;
+
+    // 모든 이미지가 로드된 후에 redraw
+    if (loadPromises.length > 0) {
+      Promise.all(loadPromises).then(() => {
+        this.diagram.redraw();
+        this.diagram.historyManager.saveState();
+      });
+    } else {
       this.diagram.redraw();
       this.diagram.historyManager.saveState();
     }
