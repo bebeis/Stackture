@@ -75,16 +75,25 @@ export class TechStackService {
         const loadingOverlay = document.querySelector('.loading-overlay');
         
         try {
+            // 세션 스토리지에 캐시된 이미지가 있는지 확인
+            const cachedImages = techStacks.every(tech => 
+                sessionStorage.getItem(tech.icon)
+            );
+
+            // 모든 이미지가 캐시되어 있다면 로딩 오버레이 즉시 제거
+            if (cachedImages) {
+                loadingOverlay.style.display = 'none';
+                return;
+            }
+
             console.log('이미지 프리로딩 시작...');
             const preloadPromises = techStacks.map(tech => this.preloadImage(tech.icon));
             await Promise.all(preloadPromises);
             console.log('이미지 프리로딩 완료');
             
-            // CSS 트랜지션을 위한 스타일 추가
             loadingOverlay.style.transition = 'opacity 0.5s ease-in-out';
             loadingOverlay.style.opacity = '0';
             
-            // 페이드 아웃 후 요소 제거
             setTimeout(() => {
                 loadingOverlay.remove();
             }, 500);
