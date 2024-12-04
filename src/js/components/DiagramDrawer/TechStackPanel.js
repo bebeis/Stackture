@@ -76,6 +76,7 @@ export class TechStackPanel {
 
   createTechStackElement(tech, pos) {
     const icon = new Image();
+    icon.crossOrigin = 'anonymous';
     icon.src = tech.icon;
     icon.onload = () => {
       const element = new IconElement(pos.x - 24, pos.y - 24, 48, 48, icon, tech);
@@ -84,7 +85,6 @@ export class TechStackPanel {
       this.diagram.elementManager.selectedElements = [element];
       this.diagram.redraw();
 
-      // 이미지가 로드되고 아이콘이 elements에 추가된 후에 saveState 호출
       this.diagram.historyManager.saveState();
     };
   }

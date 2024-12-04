@@ -121,13 +121,46 @@ export class ElementSelector {
   }
 
   findElementAtPosition(pos) {
-    for (let i = this.elementManager.elements.length - 1; i >= 0; i--) {
-      const element = this.elementManager.elements[i];
-      if (element.containsPoint(pos.x, pos.y)) {
-        return element;
-      }
+    // 클릭 위치에 있는 모든 요소들을 찾습니다
+    const elementsAtPosition = this.elementManager.elements.filter(element => 
+      element.containsPoint(pos.x, pos.y)
+    );
+
+    if (elementsAtPosition.length === 0) {
+      return null;
     }
-    return null;
+
+    // 요소가 하나만 있다면 바로 반환
+    if (elementsAtPosition.length === 1) {
+      return elementsAtPosition[0];
+    }
+
+    // 여러 요소가 겹쳐있는 경우, 마우스 커서와의 거리를 계산하여 가장 가까운 요소를 찾습니다
+    return elementsAtPosition.reduce((closest, current) => {
+      // 요소의 중심점 계산
+      const currentCenter = {
+        x: current.x + current.width / 2,
+        y: current.y + current.height / 2
+      };
+
+      const closestCenter = {
+        x: closest.x + closest.width / 2,
+        y: closest.y + closest.height / 2
+      };
+
+      // 마우스 커서와의 거리 계산
+      const currentDistance = Math.sqrt(
+        Math.pow(pos.x - currentCenter.x, 2) + 
+        Math.pow(pos.y - currentCenter.y, 2)
+      );
+
+      const closestDistance = Math.sqrt(
+        Math.pow(pos.x - closestCenter.x, 2) + 
+        Math.pow(pos.y - closestCenter.y, 2)
+      );
+
+      return currentDistance < closestDistance ? current : closest;
+    });
   }
 
   isPointInSelectedElements(pos) {

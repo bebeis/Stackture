@@ -21,18 +21,45 @@ export class SaveLoadManager {
     tempCtx.save();
     tempCtx.translate(-boundingBox.x + padding, -boundingBox.y + padding);
 
-    // 모든 요소 그리기
-    this.diagram.elementManager.elements.forEach(element => {
-      element.draw(tempCtx);
+    // 모든 요소 그리기 (비동기 처리)
+    const drawPromises = this.diagram.elementManager.elements.map(async element => {
+      if (element.type === 'icon' && element.icon) {
+        // 이미지 요소의 경우 crossOrigin 설정
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            element.icon = img;
+            element.draw(tempCtx);
+            resolve();
+          };
+          img.onerror = () => {
+            console.warn('Failed to load image:', element.icon.src);
+            resolve();
+          };
+          img.src = element.icon.src;
+        });
+      } else {
+        element.draw(tempCtx);
+        return Promise.resolve();
+      }
     });
+
+    // 모든 요소가 그려질 때까지 대기
+    await Promise.all(drawPromises);
 
     tempCtx.restore();
 
-    // PNG로 저장
-    const link = document.createElement('a');
-    link.download = 'diagram.png';
-    link.href = tempCanvas.toDataURL('image/png');
-    link.click();
+    try {
+      // PNG로 저장
+      const link = document.createElement('a');
+      link.download = 'diagram.png';
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Failed to export canvas:', error);
+      alert('이미지 저장에 실패했습니다. 일부 이미지가 보안 정책으로 인해 저장되지 않을 수 있습니다.');
+    }
   }
 
   saveAsXML() {
