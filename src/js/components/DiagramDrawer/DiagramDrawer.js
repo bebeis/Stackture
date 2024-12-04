@@ -7,6 +7,7 @@ import { GridManager } from './GridManager.js';
 import './elements/index.js';
 import { ZoomManager } from './ZoomManager.js';
 import { TechStackPanel } from './TechStackPanel.js';
+import { SaveLoadManager } from './SaveLoadManager.js';
 
 export class DiagramDrawer {
   constructor(container, techStacks) {
@@ -28,6 +29,7 @@ export class DiagramDrawer {
     this.gridManager = new GridManager(this);
     this.zoomManager = new ZoomManager(this);
     this.techStackPanel = new TechStackPanel(this);
+    this.saveLoadManager = new SaveLoadManager(this);
 
     // 지원되는 도구 목록 생성
     this.supportedTools = ['select', 'text', 'arrow'];

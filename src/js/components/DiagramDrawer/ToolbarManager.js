@@ -30,6 +30,8 @@ export class ToolbarManager {
       { id: 'cut', icon: '✂️', title: '잘라내기 (Ctrl+X)' },
       { id: 'copy', icon: '📋', title: '복사 (Ctrl+C)' },
       { id: 'paste', icon: '📎', title: '붙여넣기 (Ctrl+V)' },
+      { id: 'save', icon: '💾', title: '저장' },
+      { id: 'load', icon: '📂', title: '불러오기' }
     ];
 
     tools.forEach((tool) => this.createToolButton(tool));
@@ -64,6 +66,71 @@ export class ToolbarManager {
         case 'paste':
           this.diagram.elementManager.pasteElements();
           break;
+        case 'save':
+          const saveMenu = document.createElement('div');
+          saveMenu.classList.add('save-menu');
+          saveMenu.style.position = 'absolute';
+          saveMenu.style.background = 'white';
+          saveMenu.style.border = '1px solid #ccc';
+          saveMenu.style.borderRadius = '4px';
+          saveMenu.style.padding = '8px';
+          saveMenu.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+          saveMenu.style.zIndex = '1000';
+
+          const buttonRect = button.getBoundingClientRect();
+          saveMenu.style.top = `${buttonRect.bottom + 5}px`;
+          saveMenu.style.left = `${buttonRect.left}px`;
+
+          const savePNG = document.createElement('button');
+          savePNG.textContent = 'PNG로 저장';
+          savePNG.style.display = 'block';
+          savePNG.style.width = '100%';
+          savePNG.style.marginBottom = '4px';
+          savePNG.style.padding = '4px 8px';
+          savePNG.onclick = () => {
+            this.diagram.saveLoadManager.saveAsImage();
+            document.body.removeChild(saveMenu);
+          };
+
+          const saveXML = document.createElement('button');
+          saveXML.textContent = 'XML로 저장';
+          saveXML.style.display = 'block';
+          saveXML.style.width = '100%';
+          saveXML.style.padding = '4px 8px';
+          saveXML.onclick = () => {
+            this.diagram.saveLoadManager.saveAsXML();
+            document.body.removeChild(saveMenu);
+          };
+
+          saveMenu.appendChild(savePNG);
+          saveMenu.appendChild(saveXML);
+          document.body.appendChild(saveMenu);
+
+          // 외부 클릭 시 메뉴 닫기
+          const closeMenu = (e) => {
+            if (!saveMenu.contains(e.target) && e.target !== button) {
+              document.body.removeChild(saveMenu);
+              document.removeEventListener('click', closeMenu);
+            }
+          };
+          setTimeout(() => document.addEventListener('click', closeMenu), 0);
+          break;
+
+        case 'load':
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.xml';
+          input.style.display = 'none';
+          input.onchange = (e) => {
+            if (e.target.files[0]) {
+              this.diagram.saveLoadManager.loadFromXML(e.target.files[0]);
+            }
+          };
+          document.body.appendChild(input);
+          input.click();
+          document.body.removeChild(input);
+          break;
+
         default:
           this.diagram.setTool(tool.id);
           this.hideSubmenus();
