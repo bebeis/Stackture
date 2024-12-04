@@ -22,6 +22,19 @@ export class HistoryManager {
   restoreElements(elementDataArray) {
     return elementDataArray.map(data => {
       const element = this.diagram.elementManager.elementFactory.createElementFromData(data);
+      
+      if (element.type === 'icon' && data.iconSrc) {
+        const icon = new Image();
+        icon.crossOrigin = 'anonymous';
+        icon.src = data.iconSrc;
+        element.icon = icon;
+        
+        // 이미지가 로드되면 캔버스 다시 그리기
+        icon.onload = () => {
+          this.diagram.redraw();
+        };
+      }
+      
       element.isSelected = data.isSelected;
       return element;
     });

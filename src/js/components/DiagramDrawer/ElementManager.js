@@ -193,47 +193,42 @@ export class ElementManager {
   copySelectedElements() {
     if (this.selectedElements.length > 0) {
       this.copiedElements = this.selectedElements.map(el => {
-        const copy = { ...el };
-        // IconElement인 경우 이미지 객체 복사
+        const serializedData = el.serialize();
         if (el.type === 'icon' && el.icon) {
-          const newImage = new Image();
-          newImage.src = el.icon.src;
-          copy.icon = newImage;
-          copy.tech = el.tech;
+          serializedData.iconSrc = el.icon.src;
+          serializedData.tech = el.tech;
         }
-        copy.x += 10;
-        copy.y += 10;
-        copy.isSelected = false;
-        return copy;
+        return serializedData;
       });
     }
   }
 
   pasteElements() {
     if (this.copiedElements && this.copiedElements.length > 0) {
-      const newElements = this.copiedElements.map(el => {
-        let newElement;
-        if (el.type === 'icon') {
-          newElement = this.elementFactory.createElement(
-            el.type,
-            el.x,
-            el.y,
-            el.width,
-            el.height,
-            el.icon,
-            el.tech
-          );
-        } else {
-          newElement = this.elementFactory.createElement(
-            el.type,
-            el.x,
-            el.y,
-            el.width,
-            el.height
-          );
+      // 기존 선택된 요소들의 선택 상태를 해제
+      this.selectedElements.forEach(el => {
+        el.isSelected = false;
+      });
+      
+      const newElements = [];
+      
+      this.copiedElements.forEach(data => {
+        const element = this.elementFactory.createElementFromData(data);
+        element.x += 10;
+        element.y += 10;
+        element.isSelected = true;
+        
+        if (element.type === 'icon') {
+          const icon = new Image();
+          icon.crossOrigin = 'anonymous';
+          icon.src = data.iconSrc;
+          icon.onload = () => {
+            element.icon = icon;
+            this.diagram.redraw();
+          };
         }
-        newElement.isSelected = true;
-        return newElement;
+        
+        newElements.push(element);
       });
 
       this.elements.push(...newElements);
@@ -284,18 +279,43 @@ export class ElementManager {
 
   copySelectedElements() {
     if (this.selectedElements.length > 0) {
-      this.copiedElements = this.selectedElements.map(el => el.serialize());
+      this.copiedElements = this.selectedElements.map(el => {
+        const serializedData = el.serialize();
+        if (el.type === 'icon' && el.icon) {
+          serializedData.iconSrc = el.icon.src;
+          serializedData.tech = el.tech;
+        }
+        return serializedData;
+      });
     }
   }
 
   pasteElements() {
     if (this.copiedElements && this.copiedElements.length > 0) {
-      const newElements = this.copiedElements.map(data => {
+      // 기존 선택된 요소들의 선택 상태를 해제
+      this.selectedElements.forEach(el => {
+        el.isSelected = false;
+      });
+      
+      const newElements = [];
+      
+      this.copiedElements.forEach(data => {
         const element = this.elementFactory.createElementFromData(data);
         element.x += 10;
         element.y += 10;
         element.isSelected = true;
-        return element;
+        
+        if (element.type === 'icon') {
+          const icon = new Image();
+          icon.crossOrigin = 'anonymous';
+          icon.src = data.iconSrc;
+          icon.onload = () => {
+            element.icon = icon;
+            this.diagram.redraw();
+          };
+        }
+        
+        newElements.push(element);
       });
 
       this.elements.push(...newElements);
