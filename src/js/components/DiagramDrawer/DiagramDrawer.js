@@ -123,6 +123,27 @@ export class DiagramDrawer {
               this.elementManager.pasteElements();
             }
             break;
+
+          case 's':
+            e.preventDefault();
+            this.saveLoadManager.saveAsImage();
+            break;
+
+          case 'o':
+            e.preventDefault();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xml';
+            input.style.display = 'none';
+            input.onchange = (e) => {
+              if (e.target.files[0]) {
+                this.saveLoadManager.loadFromXML(e.target.files[0]);
+              }
+            };
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+            break;
         }
       } else {
         // 일반 키 처리

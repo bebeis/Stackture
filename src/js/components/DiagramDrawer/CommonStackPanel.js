@@ -129,7 +129,7 @@ export class CommonStackPanel {
   showDragTooltip() {
     const tooltip = document.createElement('div');
     tooltip.classList.add('drag-tooltip');
-    tooltip.textContent = '공통 아이콘을 드래그하여 캔버스에 추가할 수 있습니다';
+    tooltip.textContent = '디바이스 아이콘을 드래그하여 캔버스에 추가할 수 있습니다';
     document.body.appendChild(tooltip);
     
     this.tooltipShown = true;

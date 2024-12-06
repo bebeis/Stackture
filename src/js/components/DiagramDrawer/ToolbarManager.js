@@ -32,8 +32,8 @@ export class ToolbarManager {
       { id: 'cut', icon: '✂️', title: '잘라내기 (Ctrl+X)' },
       { id: 'copy', icon: '📋', title: '복사 (Ctrl+C)' },
       { id: 'paste', icon: '📎', title: '붙여넣기 (Ctrl+V)' },
-      { id: 'save', icon: '💾', title: '���' },
-      { id: 'load', icon: '📂', title: '불러오기' }
+      { id: 'save', icon: '💾', title: '저장 (Ctrl+S)' },
+      { id: 'load', icon: '📂', title: '불러오기 (Ctrl+O)' }
     ];
 
     tools.forEach((tool) => this.createToolButton(tool));
@@ -350,15 +350,15 @@ export class ToolbarManager {
 
   getTooltipContent(toolId) {
     const tooltipContent = {
-      'select': '요소를 선택하고 이동할 수 있습니다<br>Shift/Ctrl(Cmd) + 클릭으로 다중 선택이 가능합니다',
+      'select': '요소를 선택하고 이동할 수 있습니다<br>요소가 있는 영역을 드래그를 통해 다중 선택하거나<br>Shift/Ctrl(Cmd) + 클릭으로 다중 선택이 가능합니다',
       'shapes': '사각형, 원 등 다양한 도형을 그릴 수 있습니다',
       'arrows': '화살표와 선을 그릴 수 있습니다<br>클릭하여 시작점을, 드래그하여 끝점을 지정합니다',
-      'text': '텍스트를 추가할 수 있습니다<br>클릭하여 입력을 시작하고 Esc를 누르거나 텍스트 박스 바깥을 클릭하여 완료합니다',
+      'text': '텍스트를 추가할 수 있습니다<br>클릭하여 입력을 시작하고<br> Esc를 누르거나 텍스트 박스 바깥을 클릭하여 완료합니다',
       'cut': '선택한 요소를 잘라냅니다<br>단축키: Ctrl(Cmd) + X',
       'copy': '선택한 요소를 복사합니다<br>단축키: Ctrl(Cmd) + C',
       'paste': '복사한 요소를 붙여넣습니다<br>단축키: Ctrl(Cmd) + V',
-      'save': '다이어그램을 PNG 또는 XML 형식으로 저장합니다',
-      'load': '저장된 다이어그램을 불러옵니다'
+      'save': '다이어그램을 PNG 또는 XML 형식으로 저장합니다<br>단축키: Ctrl(Cmd) + S',
+      'load': '저장된 다이어그램을 불러옵니다<br>단축키: Ctrl(Cmd) + O'
     };
 
     return tooltipContent[toolId] || '';
