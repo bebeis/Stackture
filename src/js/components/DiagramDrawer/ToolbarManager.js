@@ -32,7 +32,7 @@ export class ToolbarManager {
       { id: 'cut', icon: '✂️', title: '잘라내기 (Ctrl+X)' },
       { id: 'copy', icon: '📋', title: '복사 (Ctrl+C)' },
       { id: 'paste', icon: '📎', title: '붙여넣기 (Ctrl+V)' },
-      { id: 'save', icon: '💾', title: '장' },
+      { id: 'save', icon: '💾', title: '���' },
       { id: 'load', icon: '📂', title: '불러오기' }
     ];
 
@@ -202,16 +202,34 @@ export class ToolbarManager {
     undoButton.innerHTML = '↩️';
     undoButton.title = 'Undo (Ctrl+Z)';
     undoButton.addEventListener('click', () => this.diagram.historyManager.undo());
+    undoButton.addEventListener('mouseenter', () => {
+      this.showTooltip(undoButton, '작업을 되돌립니다<br>단축키: Ctrl+Z');
+    });
+    undoButton.addEventListener('mouseleave', () => {
+      this.hideTooltip();
+    });
 
     const redoButton = document.createElement('button');
     redoButton.innerHTML = '↪️';
     redoButton.title = 'Redo (Ctrl+Shift+Z)';
     redoButton.addEventListener('click', () => this.diagram.historyManager.redo());
+    redoButton.addEventListener('mouseenter', () => {
+      this.showTooltip(redoButton, '작업을 다시 실행합니다<br>단축키: Ctrl+Shift+Z');
+    });
+    redoButton.addEventListener('mouseleave', () => {
+      this.hideTooltip();
+    });
 
     const gridButton = document.createElement('button');
     gridButton.innerHTML = '📏';
     gridButton.title = 'Toggle Grid';
     gridButton.addEventListener('click', () => this.diagram.gridManager.toggleGrid());
+    gridButton.addEventListener('mouseenter', () => {
+      this.showTooltip(gridButton, '그리드를 켜거나 끕니다');
+    });
+    gridButton.addEventListener('mouseleave', () => {
+      this.hideTooltip();
+    });
 
     this.toolbar.appendChild(undoButton);
     this.toolbar.appendChild(redoButton);
