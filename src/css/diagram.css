@@ -401,3 +401,41 @@
   opacity: 0.6;
   cursor: grabbing;
 }
+
+.toolbar-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  pointer-events: none;
+  z-index: 1100;
+  text-align: center;
+  line-height: 1.4;
+  max-width: 250px;
+  white-space: normal;
+  animation: tooltipFadeIn 0.2s ease-in-out;
+}
+
+.toolbar-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
