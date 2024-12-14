@@ -63,14 +63,33 @@ export class DiagramDrawer {
   initCanvas() {
     this.canvas = document.createElement('canvas');
     this.canvas.classList.add('diagram-canvas');
+    this.container.appendChild(this.canvas);
     
-    // 컨테이너 크기에 맞춰 캔버스 크기 설정
-    const containerHeight = this.container.clientHeight - 60; // 툴바 높이 고려
-    this.canvas.width = this.container.clientWidth;
-    this.canvas.height = containerHeight;
+    // DOM에 추가된 후 크기 설정
+    this.updateCanvasSize();
     
     this.ctx = this.canvas.getContext('2d');
-    this.container.appendChild(this.canvas);
+  }
+
+  updateCanvasSize() {
+    const container = this.canvas.parentElement;
+    const rect = container.getBoundingClientRect();
+    
+    // 캔버스 크기를 컨테이너에 맞춤
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    
+    // 캔버스 스타일 설정
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
+    
+    // 컨텍스트가 있는 경우에만 변환 적용
+    if (this.ctx) {
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      if (this.zoomManager) {
+        this.ctx.scale(this.zoomManager.scale, this.zoomManager.scale);
+      }
+    }
   }
 
   initUI() {
@@ -178,12 +197,17 @@ export class DiagramDrawer {
       }
     });
 
-    // 창 크기 변경 이벤트
-    window.addEventListener('resize', () => {
-      this.canvas.width = window.innerWidth - 40;
-      this.canvas.height = window.innerHeight - 300;
-      this.redraw();
+    // resize 이벤트 핸들러 수정
+    const resizeObserver = new ResizeObserver(() => {
+      this.updateCanvasSize();
+      if (this.ctx) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.scale(this.zoomManager.scale, this.zoomManager.scale);
+        this.redraw();
+      }
     });
+
+    resizeObserver.observe(this.container);
   }
 
   setTool(toolId, subType = null) {
