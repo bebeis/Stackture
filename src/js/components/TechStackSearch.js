@@ -9,6 +9,7 @@ export class TechStackSearch {
         this.searchResults = document.querySelector('.search-results');
         this.selectedGrid = document.querySelector('.selected-grid');
         this.techStackService = new TechStackService();
+        this.floatingIcons = null;
         
         this.init();
     }
@@ -29,7 +30,7 @@ export class TechStackSearch {
     }
 
     setupEventListeners() {
-        // 색어 입력할 때마다 실시간으로 결과 표시
+        // 어 입력할 때마다 실시간으로 결과 표시
         this.searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.trim();
             this.showSearchResults(searchTerm);
@@ -101,6 +102,10 @@ export class TechStackSearch {
 
         this.selectedTechs.add(techId);
         this.updateSelectedGrid();
+        
+        if (this.floatingIcons) {
+            this.floatingIcons.jumpToSearchBar(techId);
+        }
     }
 
     updateSelectedGrid() {
@@ -122,9 +127,7 @@ export class TechStackSearch {
         selectedTagsContainer.querySelectorAll('.remove-tag').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const techId = Number(e.target.dataset.techId);
-                this.selectedTechs.delete(techId);
-                this.updateSelectedGrid();
-                this.updateCategoryGrid(); // 카테고리별 그리드도 함께 업데이트
+                this.removeTechStack(techId);
             });
         });
 
@@ -178,11 +181,23 @@ export class TechStackSearch {
     }
 
     removeTechStack(techId) {
+        const tech = this.techStacks.find(t => t.id === techId);
+        if (!tech) return;
+
         this.selectedTechs.delete(techId);
         this.updateSelectedGrid();
+        this.updateCategoryGrid();
+        
+        if (this.floatingIcons) {
+            this.floatingIcons.dropFromSearchBar(tech);
+        }
     }
 
     getSelectedTechStacks() {
         return this.techStacks.filter(tech => this.selectedTechs.has(tech.id));
+    }
+
+    setFloatingIcons(floatingIcons) {
+        this.floatingIcons = floatingIcons;
     }
 }

@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // TechStackSearch 초기화가 완료된 후 FloatingIcons 설정
     await techStackSearch.init();
+    techStackSearch.setFloatingIcons(floatingIcons);
     floatingIcons.setTechStackSearch(techStackSearch);
     
     const drawButton = document.querySelector('.draw-button');
