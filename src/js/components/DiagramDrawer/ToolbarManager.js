@@ -283,18 +283,24 @@ export class ToolbarManager {
     // 모든 버튼의 active 클래스 제거
     this.toolbar.querySelectorAll('button').forEach((button) => {
       button.classList.remove('active');
+      button.classList.remove('semi-active');
     });
 
     // shapes 서브메뉴의 버튼들도 active 클래스 제거
     if (this.shapesSubmenu) {
       this.shapesSubmenu.querySelectorAll('button').forEach((button) => {
         button.classList.remove('active');
+        button.classList.remove('semi-active');
       });
     }
 
-    // 선택된 버튼에 active 클래스 추가
+    // 선택된 버튼에 active 또는 semi-active 클래스 추가
     if (activeButton) {
-      activeButton.classList.add('active');
+      if (activeButton.dataset.tool === 'select' && !this.diagram.isSelectMode) {
+        activeButton.classList.add('semi-active');
+      } else {
+        activeButton.classList.add('active');
+      }
     }
   }
 

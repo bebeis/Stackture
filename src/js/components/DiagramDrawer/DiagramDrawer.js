@@ -21,10 +21,14 @@ export class DiagramDrawer {
     this.currentTool = 'select';
     this.isShiftPressed = false;
     this.currentArrowType = 'one-way';
+    this.isSelectMode = false; // 초기값을 false로 설정
 
     // 캔버스 초기화
     this.initCanvas();
-
+    
+    // 초기 커서 스타일 설정
+    this.canvas.style.cursor = 'grab';
+    
     // 매니저 초기화
     this.elementManager = new ElementManager(this);
     this.toolbarManager = new ToolbarManager(this);
@@ -214,15 +218,30 @@ export class DiagramDrawer {
     if (!this.supportedTools.includes(toolId)) {
       throw new Error(`Unsupported tool: ${toolId}`);
     }
-    this.currentTool = toolId;
+    
+    // 이전 도구가 select였고, 새로운 도구도 select인 경우에만 토글
+    if (toolId === 'select' && this.currentTool === 'select') {
+      this.isSelectMode = !this.isSelectMode;
+    } else {
+      // 다른 도구로 변경하는 경우
+      this.currentTool = toolId;
+      this.isSelectMode = (toolId === 'select'); // select 도구 선택시에만 true
+    }
+
+    // 커서 스타일 설정
+    if (toolId === 'select') {
+      this.canvas.style.cursor = this.isSelectMode ? 'default' : 'grab';
+    } else {
+      this.canvas.style.cursor = 'crosshair';
+    }
 
     // 화살표 타입 설정
     if (toolId === 'arrow' && subType) {
       this.currentArrowType = subType;
     }
 
-    // select 모드가 아닌 다른 도구로 변경할 때는 선택 해제
-    if (toolId !== 'select') {
+    // select 모드가 아닌 경우나 isSelectMode가 false인 경우 선택 해제
+    if (toolId !== 'select' || !this.isSelectMode) {
       this.elementManager.deselectAll();
     }
 

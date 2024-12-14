@@ -56,7 +56,16 @@ export class ElementManager {
 
     switch (this.diagram.currentTool) {
       case 'select':
-        this.elementSelector.handleSelectMouseDown(e, pos);
+        if (!this.diagram.isSelectMode) {
+          // 선택 모드가 아닐 때는 캔버스 드래그 시작
+          this.diagram.canvas.style.cursor = 'grabbing';
+          this.diagram.zoomManager.isDragging = true;
+          this.diagram.zoomManager.lastX = e.clientX;
+          this.diagram.zoomManager.lastY = e.clientY;
+        } else {
+          // 선택 모드일 때는 기존 선택 동작 수행
+          this.elementSelector.handleSelectMouseDown(e, pos);
+        }
         break;
 
       case 'text':

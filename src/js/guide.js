@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ticking = false;
     };
     
-    // 스���롤 이벤트 리스너
+    // 스크롤 이벤트 리스너
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
