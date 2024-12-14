@@ -51,6 +51,11 @@
     color: #2196f3;
 }
 
+.guide-nav a.active {
+    color: #2196f3;
+    font-weight: 500;
+}
+
 .guide-content {
     flex: 1;
     background: white;
