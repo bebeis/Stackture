@@ -29,7 +29,7 @@ export class TechStackSearch {
     }
 
     setupEventListeners() {
-        // 검색어 입력할 때마다 실시간으로 결과 표시
+        // ��색어 입력할 때마다 실시간으로 결과 표시
         this.searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.trim();
             this.showSearchResults(searchTerm);
@@ -108,7 +108,26 @@ export class TechStackSearch {
             this.selectedTechs.has(tech.id)
         );
 
-        // 모든 카테고리 목록 가져오기
+        // 태그 업데이트
+        const selectedTagsContainer = document.querySelector('.selected-tags');
+        selectedTagsContainer.innerHTML = selectedTechStacks.map(tech => `
+            <div class="tech-tag" data-id="${tech.id}">
+                <img src="${tech.icon}" alt="${tech.name}">
+                <span>${tech.name}</span>
+                <span class="remove-tag" data-tech-id="${tech.id}">×</span>
+            </div>
+        `).join('');
+
+        // 태그 삭제 이벤트 리스너 추가
+        selectedTagsContainer.querySelectorAll('.remove-tag').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const techId = e.target.dataset.techId;
+                this.selectedTechs.delete(techId);
+                this.updateSelectedGrid();
+            });
+        });
+
+        // 기존 카테고리별 그리드 업데이트 코드
         const allCategories = [...new Set(this.techStacks.map(tech => tech.category))];
 
         // 카테고리 한글 매핑
