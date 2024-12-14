@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q&A - Stackture</title>
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/qna.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container" onclick="window.location.href='index.html'">
+            <img src="src/assets/logo.svg" alt="Stackture" class="logo">
+            <h1>Stackture</h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="introduction.html">Introduction</a>
+            <a href="guide.html">Guide</a>
+            <a href="qna.html">Q&A</a>
+            <a href="https://github.com/DawnGlow/Stackture" class="github-link">
+                <img src="src/assets/github.svg" alt="GitHub" class="github-icon">
+                Visit Github
+            </a>
+        </nav>
+    </header>
+
+    <main class="qna-container">
+        <h1 class="page-title">자주 묻는 질문</h1>
+        <div class="qna-description">
+            <p>Stackture 사용 중 궁금한 점이나 문제가 있다면 확인해보세요.</p>
+        </div>
+        <div class="qna-list">
+            <div class="qna-post">
+                <div class="post-header" onclick="toggleContent(this)">
+                    <div class="post-info">
+                        <span class="post-category">기술 스택</span>
+                        <h2 class="post-title">찾고자 하는 기술 스택 아이콘이 없습니다. 기술 스택 아이콘을 추가해주세요</h2>
+                    </div>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="post-content">
+                    <p>Github의 Pull Request 기능을 이용해주세요.</p>
+                    <a href="https://github.com/DawnGlow/Stackture/pulls" class="action-link">
+                        <img src="src/assets/github.svg" alt="GitHub" class="github-icon">
+                        Pull Request 작성하기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleContent(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            const post = header.closest('.qna-post');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.textContent = '▼';
+                post.classList.remove('active');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.textContent = '▲';
+                post.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html> 
