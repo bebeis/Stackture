@@ -439,3 +439,44 @@
     transform: translateY(0);
   }
 }
+
+@media screen and (max-width: 768px) {
+  .drawing-toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .tech-stack-panel,
+  .os-stack-panel,
+  .common-stack-panel {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+
+  .diagram-container {
+    margin-top: 1rem;
+  }
+
+  .canvas-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .drawing-toolbar button {
+    padding: 0.5rem;
+  }
+
+  .tech-stack-panel,
+  .os-stack-panel,
+  .common-stack-panel {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  }
+}

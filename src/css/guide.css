@@ -118,3 +118,30 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     display: block;
 }
+
+@media screen and (max-width: 1024px) {
+  .guide-container {
+    flex-direction: column;
+    padding: 0 0.5rem;
+  }
+
+  .guide-sidebar {
+    width: 100%;
+  }
+
+  .guide-nav {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .guide-content {
+    padding: 1rem;
+  }
+
+  .guide-image {
+    width: 100%;
+    height: auto;
+  }
+}

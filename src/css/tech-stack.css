@@ -45,3 +45,33 @@
     padding: 2rem;
     color: #666;
 }
+
+@media screen and (max-width: 768px) {
+  .tech-stack-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .tech-item {
+    padding: 0.8rem;
+  }
+
+  .tech-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .selected-techs {
+    margin-top: 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .tech-stack-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .tech-icon {
+    width: 32px;
+    height: 32px;
+  }
+}

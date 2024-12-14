@@ -418,3 +418,52 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* 반응형 스타일 추가 */
+@media screen and (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .nav-menu {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .github-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .main-container {
+    padding: 0 0.5rem;
+    margin: 1rem auto;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .draw-button {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .main-title {
+    font-size: 1.5rem;
+  }
+
+  .drag-guide {
+    font-size: 0.9rem;
+  }
+}
