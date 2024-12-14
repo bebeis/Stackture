@@ -2,7 +2,7 @@ export class FloatingIcons {
     constructor() {
         this.container = document.querySelector('.floating-icons-container');
         this.icons = [];
-        this.iconSize = 48;
+        this.iconSize = window.innerWidth <= 768 ? 24 : 48;
         this.techStackSearch = null;
         this.searchBarRect = null;
     }
