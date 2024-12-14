@@ -5,14 +5,32 @@
 }
 
 .intro-hero {
+    position: relative;
     text-align: center;
     padding: 4rem 0;
     margin-bottom: 4rem;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 16px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.intro-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/public/introduction/ex1.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.1;
+    z-index: -1;
 }
 
 .intro-title {
+    position: relative;
+    z-index: 2;
     font-size: 3.5rem;
     color: #1a73e8;
     margin-bottom: 1.5rem;
@@ -20,6 +38,8 @@
 }
 
 .intro-subtitle {
+    position: relative;
+    z-index: 2;
     font-size: 1.2rem;
     color: #5f6368;
     max-width: 600px;
@@ -28,6 +48,8 @@
 }
 
 .cta-buttons {
+    position: relative;
+    z-index: 2;
     display: flex;
     gap: 1rem;
     justify-content: center;

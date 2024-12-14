@@ -29,7 +29,7 @@ export class TechStackSearch {
     }
 
     setupEventListeners() {
-        // ��색어 입력할 때마다 실시간으로 결과 표시
+        // 색어 입력할 때마다 실시간으로 결과 표시
         this.searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.trim();
             this.showSearchResults(searchTerm);
@@ -121,16 +121,23 @@ export class TechStackSearch {
         // 태그 삭제 이벤트 리스너 추가
         selectedTagsContainer.querySelectorAll('.remove-tag').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const techId = e.target.dataset.techId;
+                const techId = Number(e.target.dataset.techId);
                 this.selectedTechs.delete(techId);
                 this.updateSelectedGrid();
+                this.updateCategoryGrid(); // 카테고리별 그리드도 함께 업데이트
             });
         });
 
-        // 기존 카테고리별 그리드 업데이트 코드
-        const allCategories = [...new Set(this.techStacks.map(tech => tech.category))];
+        this.updateCategoryGrid(); // 카테고리 그리드 업데이트를 위한 새로운 메서드 호출
+    }
 
-        // 카테고리 한글 매핑
+    // 카테고리별 그리드 업데이트를 위한 새로운 메서드
+    updateCategoryGrid() {
+        const selectedTechStacks = this.techStacks.filter(tech => 
+            this.selectedTechs.has(tech.id)
+        );
+
+        const allCategories = [...new Set(this.techStacks.map(tech => tech.category))];
         const categoryNames = {
             frontend: '프론트엔드',
             backend: '백엔드',
@@ -140,11 +147,9 @@ export class TechStackSearch {
             cloud: '클라우드'
         };
 
-        // 각 카테고리별 영역 생성
         this.selectedGrid.innerHTML = allCategories.map(category => {
             const techsInCategory = selectedTechStacks.filter(tech => tech.category === category);
-            
-            if (techsInCategory.length === 0) return ''; // 해당 카테고리에 선택된 기술이 없으면 건너뜀
+            if (techsInCategory.length === 0) return '';
 
             return `
                 <div class="category-section">
@@ -162,11 +167,12 @@ export class TechStackSearch {
             `;
         }).join('');
 
-        // 제거 버튼에 이벤트 리스너 추가
+        // 카테고리 그리드의 삭제 버튼에도 이벤트 리스너 추가
         this.selectedGrid.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const techId = Number(e.target.dataset.techId);
-                this.removeTechStack(techId);
+                this.selectedTechs.delete(techId);
+                this.updateSelectedGrid();
             });
         });
     }
