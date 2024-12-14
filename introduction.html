@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introduction - Stackture</title>
     <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/introduction.css">
 </head>
 <body>
     <header class="header">
@@ -16,6 +17,7 @@
         <nav class="nav-menu">
             <a href="introduction.html">Introduction</a>
             <a href="guide.html">Guide</a>
+            <a href="qna.html">Q&A</a>
             <a href="https://github.com/DawnGlow/Stackture" class="github-link">
                 <img src="src/assets/github.svg" alt="GitHub" class="github-icon">
                 Visit Github
@@ -23,20 +25,66 @@
         </nav>
     </header>
 
-    <main class="content-container">
-        <h1 class="page-title">Stackture 소개</h1>
-        <section class="intro-section">
-            <h2>아키텍처 다이어그램을 쉽게 그리세요</h2>
-            <p>Stackture는 개발자들이 시스템 아키텍처를 쉽게 설계하고 표현할 수 있도록 도와주는 도구입니다.</p>
-            <img src="public/images/impl2.png" alt="구현 이미지" class="intro-image">
-            
-            <h3>주요 기능</h3>
-            <ul>
-                <li>다양한 기술 스택 아이콘 제공</li>
-                <li>직관적인 드래그 앤 드롭 인터페이스</li>
-                <li>실시간 기술 스택 검색</li>
-                <li>PNG, XML 형식으로 다이어그램 저장</li>
-            </ul>
+    <main class="intro-container">
+        <section class="intro-hero">
+            <h1 class="intro-title">아키텍처 다이어그램을<br>쉽게 그리세요</h1>
+            <p class="intro-subtitle">Stackture는 개발자들이 시스템 아키텍처를 쉽게 설계하고 표현할 수 있도록 도와주는 도구입니다.</p>
+            <div class="cta-buttons">
+                <a href="index.html" class="cta-primary">시작하기</a>
+                <a href="guide.html" class="cta-secondary">사용 가이드</a>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <h2>주요 기능</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>직관적인 인터페이스</h3>
+                    <p>드래그 앤 드롭으로 손쉽게 다이어그램을 그릴 수 있습니다.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>기술 스택 검색</h3>
+                    <p>원하는 기술 스택을 빠르게 찾고 선택할 수 있습니다.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>다양한 저장 형식</h3>
+                    <p>PNG, XML 형식으로 다이어그램을 저장하고 공유할 수 있습니다.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>실시간 편집</h3>
+                    <p>실시간으로 다이어그램을 수정하고 미리볼 수 있습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="demo-section">
+            <h2>구현 예시</h2>
+            <div class="demo-images">
+                <img src="public/images/impl1.png" alt="구현 이미지 1" class="demo-image">
+                <img src="public/images/impl2.png" alt="구현 이미지 2" class="demo-image">
+            </div>
+        </section>
+
+        <section class="tech-section">
+            <h2>사용된 기술</h2>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <h4>Front-end</h4>
+                    <p>HTML, CSS, Vanilla JavaScript</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Back-end</h4>
+                    <p>Firebase (PaaS)</p>
+                </div>
+                <div class="tech-item">
+                    <h4>CDN</h4>
+                    <p>Firebase Cloud Storage</p>
+                </div>
+            </div>
         </section>
     </main>
 </body>
