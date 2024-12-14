@@ -45,25 +45,23 @@ export class ElementManager {
     const snappedPos = this.diagram.gridManager.snapToGrid(pos);
 
     if (this.elementCreator.isTypingText) {
-      // 텍스트 입력 중일 때, 클릭한 위치가 현재 텍스트 요소 밖이면 텍스트 입력 완료
-      if (
-        !this.elementCreator.activeTextElement.containsPoint(pos.x, pos.y)
-      ) {
+      if (!this.elementCreator.activeTextElement.containsPoint(pos.x, pos.y)) {
         this.elementCreator.finalizeTextInput();
       }
       return;
     }
 
+    // 터치 이벤트 여부 확인
+    const isTouchEvent = e.type.startsWith('touch');
+
     switch (this.diagram.currentTool) {
       case 'select':
-        if (!this.diagram.isSelectMode) {
-          // 선택 모드가 아닐 때는 캔버스 드래그 시작
+        if (!this.diagram.isSelectMode || isTouchEvent) {
           this.diagram.canvas.style.cursor = 'grabbing';
           this.diagram.zoomManager.isDragging = true;
-          this.diagram.zoomManager.lastX = e.clientX;
-          this.diagram.zoomManager.lastY = e.clientY;
+          this.diagram.zoomManager.lastX = isTouchEvent ? e.touches[0].clientX : e.clientX;
+          this.diagram.zoomManager.lastY = isTouchEvent ? e.touches[0].clientY : e.clientY;
         } else {
-          // 선택 모드일 때는 기존 선택 동작 수행
           this.elementSelector.handleSelectMouseDown(e, pos);
         }
         break;

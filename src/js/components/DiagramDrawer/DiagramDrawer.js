@@ -106,6 +106,46 @@ export class DiagramDrawer {
     this.canvas.addEventListener('mousemove', this.elementManager.handleMouseMove.bind(this.elementManager));
     this.canvas.addEventListener('mouseup', this.elementManager.handleMouseUp.bind(this.elementManager));
 
+    // 키치 이벤트 리스너 추가
+    this.canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent('mousedown', {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      this.elementManager.handleMouseDown(mouseEvent);
+    });
+
+    this.canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent('mousemove', {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      this.elementManager.handleMouseMove(mouseEvent);
+    });
+
+    this.canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const lastTouch = e.changedTouches[0];
+      const mouseEvent = new MouseEvent('mouseup', {
+        clientX: lastTouch.clientX,
+        clientY: lastTouch.clientY,
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      this.elementManager.handleMouseUp(mouseEvent);
+    });
+
     // 키보드 이벤트 리스너
     document.addEventListener('keydown', (e) => {
       if (this.elementManager.elementCreator.isTypingText) {
@@ -240,7 +280,7 @@ export class DiagramDrawer {
       this.currentArrowType = subType;
     }
 
-    // select 모드가 아닌 경우나 isSelectMode가 false인 경우 선택 해제
+    // select 모드가 아닌 경우나 isSelectMode��� false인 경우 선택 해제
     if (toolId !== 'select' || !this.isSelectMode) {
       this.elementManager.deselectAll();
     }

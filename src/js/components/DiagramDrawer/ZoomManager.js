@@ -112,6 +112,83 @@ export class ZoomManager {
           this.diagram.canvas.style.cursor = 'default';
         }
       });
+  
+      // 두 손가락 터치 이벤트 처리
+      let lastTouchDistance = 0;
+      let lastTouchCenter = { x: 0, y: 0 };
+
+      this.diagram.canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          this.isDragging = true;
+          
+          // 두 손가락 사이의 중심점 계산
+          const touch1 = e.touches[0];
+          const touch2 = e.touches[1];
+          lastTouchCenter = {
+            x: (touch1.clientX + touch2.clientX) / 2,
+            y: (touch1.clientY + touch2.clientY) / 2
+          };
+          
+          // 두 손가락 사이의 거리 계산
+          lastTouchDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+          );
+        }
+      });
+
+      this.diagram.canvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && this.isDragging) {
+          e.preventDefault();
+          
+          const touch1 = e.touches[0];
+          const touch2 = e.touches[1];
+          
+          // 현재 두 손가락의 중심점 계산
+          const currentCenter = {
+            x: (touch1.clientX + touch2.clientX) / 2,
+            y: (touch1.clientY + touch2.clientY) / 2
+          };
+          
+          // 이동 거리 계산
+          const dx = currentCenter.x - lastTouchCenter.x;
+          const dy = currentCenter.y - lastTouchCenter.y;
+          
+          // 캔버스 이동
+          this.translateX += dx;
+          this.translateY += dy;
+          
+          // 중심점 업데이트
+          lastTouchCenter = currentCenter;
+          
+          // 현재 두 손가락 사이의 거리 계산
+          const currentDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+          );
+          
+          // 핀치 줌 처리
+          if (Math.abs(currentDistance - lastTouchDistance) > 10) {
+            const scale = currentDistance / lastTouchDistance;
+            this.zoom(scale, currentCenter.x, currentCenter.y);
+            lastTouchDistance = currentDistance;
+          }
+          
+          this.limitTranslation();
+          this.applyTransform();
+        }
+      });
+
+      this.diagram.canvas.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+          this.isDragging = false;
+        }
+      });
+
+      this.diagram.canvas.addEventListener('touchcancel', (e) => {
+        this.isDragging = false;
+      });
     }
   
     zoom(delta, centerX, centerY) {
