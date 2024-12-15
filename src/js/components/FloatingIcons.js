@@ -21,9 +21,15 @@ export class FloatingIcons {
         const startX = icon.x;
         const startY = icon.y;
 
-        // 검색바 중앙 위치 계산
-        const endX = this.searchBarRect.left + (this.searchBarRect.width / 2) - (this.iconSize / 2);
-        const endY = this.searchBarRect.top - this.iconSize;
+        // 선택된 태그 요소 찾기
+        const targetTag = document.querySelector(`.tech-tag[data-id="${techId}"]`);
+        if (!targetTag) return;
+
+        const tagRect = targetTag.getBoundingClientRect();
+        
+        // 태그 중앙 위치 계산
+        const endX = tagRect.left + (tagRect.width / 2) - (this.iconSize / 2);
+        const endY = tagRect.top + (tagRect.height / 2) - (this.iconSize / 2);
 
         // 애니메이션 시작
         const startTime = performance.now();
@@ -36,7 +42,7 @@ export class FloatingIcons {
             // 이지징 함수 적용 (부드러운 감속)
             const easeProgress = 1 - Math.pow(1 - progress, 3);
 
-            // 직선 경로로 위로 올라가기
+            // 직선 경로로 이동
             const currentX = startX + (endX - startX) * easeProgress;
             const currentY = startY + (endY - startY) * easeProgress;
 
@@ -58,16 +64,17 @@ export class FloatingIcons {
     }
 
     dropFromSearchBar(tech) {
+        // 삭제된 태그의 위치 찾기
+        const removedTag = document.querySelector(`.tech-tag[data-id="${tech.id}"]`);
+        if (!removedTag) return;
+
+        const tagRect = removedTag.getBoundingClientRect();
         const icon = this.createIcon(tech);
         this.container.appendChild(icon);
 
-        // 시작 위치 (검색바)
-        const startX = this.searchBarRect.left + (this.searchBarRect.width / 2) - (this.iconSize / 2);
-        const startY = this.searchBarRect.top - this.iconSize;
-
-        // 무작위 최종 위치
-        const endX = Math.random() * (window.innerWidth - this.iconSize);
-        const endY = window.innerHeight - this.iconSize;
+        // 시작 위치 (태그 위치)
+        const startX = tagRect.left + (tagRect.width / 2) - (this.iconSize / 2);
+        const startY = tagRect.top + (tagRect.height / 2) - (this.iconSize / 2);
 
         const iconData = {
             element: icon,
@@ -88,19 +95,32 @@ export class FloatingIcons {
         let velocityY = 0;
         const gravity = 0.6;
         const bounce = 0.6;
+        const friction = 0.99;
 
         const animate = () => {
             velocityY += gravity;
             iconData.y += velocityY;
+            iconData.x += iconData.velocityX;
+            iconData.rotation += iconData.rotationVelocity;
 
             // 바닥 충돌 체크
             if (iconData.y > window.innerHeight - this.iconSize) {
                 iconData.y = window.innerHeight - this.iconSize;
                 velocityY *= -bounce;
+                iconData.velocityX *= friction;
+                iconData.rotationVelocity *= friction;
             }
 
-            iconData.rotation += iconData.rotationVelocity;
-            iconData.element.style.transform = 
+            // 좌우 벽 충돌 체크
+            if (iconData.x < 0) {
+                iconData.x = 0;
+                iconData.velocityX *= -bounce;
+            } else if (iconData.x > window.innerWidth - this.iconSize) {
+                iconData.x = window.innerWidth - this.iconSize;
+                iconData.velocityX *= -bounce;
+            }
+
+            icon.element.style.transform = 
                 `translate3d(${iconData.x}px, ${iconData.y}px, 0) rotate(${iconData.rotation}deg)`;
 
             if (Math.abs(velocityY) > 0.1 || iconData.y < window.innerHeight - this.iconSize) {

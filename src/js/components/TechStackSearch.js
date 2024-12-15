@@ -183,14 +183,18 @@ export class TechStackSearch {
     removeTechStack(techId) {
         const tech = this.techStacks.find(t => t.id === techId);
         if (!tech) return;
-
-        this.selectedTechs.delete(techId);
-        this.updateSelectedGrid();
-        this.updateCategoryGrid();
         
+        // FloatingIcons 애니메이션을 먼저 실행
         if (this.floatingIcons) {
             this.floatingIcons.dropFromSearchBar(tech);
         }
+
+        // 약간의 지연 후 태그 제거
+        setTimeout(() => {
+            this.selectedTechs.delete(techId);
+            this.updateSelectedGrid();
+            this.updateCategoryGrid();
+        }, 100);
     }
 
     getSelectedTechStacks() {
