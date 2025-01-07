@@ -11,6 +11,7 @@ import { SaveLoadManager } from './SaveLoadManager.js';
 import { OsStackPanel } from './OsStackPanel.js';
 import { CommonStackPanel } from './CommonStackPanel.js';
 import { ImageCache } from './ImageCache.js';
+import { LLMPanel } from './LLMPanel.js';
 
 export class DiagramDrawer {
   constructor(container, techStacks) {
@@ -62,6 +63,8 @@ export class DiagramDrawer {
     this.startAnimation();
 
     this.imageCache = new ImageCache();
+
+    this.llmPanel = new LLMPanel(this);
   }
 
   initCanvas() {
@@ -280,7 +283,7 @@ export class DiagramDrawer {
       this.currentArrowType = subType;
     }
 
-    // select 모드가 아닌 경우나 isSelectMode��� false인 경우 선택 해제
+    // select 모드가 아닌 경우나 isSelectMode가 false인 경우 선택 해제
     if (toolId !== 'select' || !this.isSelectMode) {
       this.elementManager.deselectAll();
     }
