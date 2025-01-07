@@ -13,6 +13,11 @@
 - Back-end : FireBase (Using PaaS Service)
 - CDN : FireBase Cloud Storage
 
+## 개발중인 기능
+- 선택한 기술 스택 기반 시스템 아키텍처 추천 기능
+- 그룹 기능
+- OAuth를 이용한 Git Repository와 연동 기능
+
 ## Deployed Link
 github-pages 을 이용할 예정. 현재 firebase와 연동하지 않아 github.io로 진입 시 서비스 이용이 불가능합니다.
 <br>
