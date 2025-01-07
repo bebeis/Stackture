@@ -483,39 +483,40 @@
   }
 }
 
-.llm-panel {
+.llm-container {
   position: fixed;
   right: 0;
   top: 100px;
+  z-index: 1000;
+  display: flex;
+  align-items: stretch;
+  transition: transform 0.3s ease;
+}
+
+.llm-panel {
   width: 300px;
   background: white;
   border-radius: 8px 0 0 8px;
   box-shadow: -2px 0 8px rgba(0,0,0,0.1);
   padding: 16px;
-  z-index: 1000;
-  transition: transform 0.3s ease;
-  height: calc(100vh - 200px);
-  overflow-y: auto;
 }
 
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.close-btn {
-  background: none;
+.llm-toggle-btn {
+  width: 16px;
+  min-height: 100%;
+  background: white;
   border: none;
-  font-size: 18px;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
-.close-btn:hover {
-  background: rgba(0,0,0,0.1);
+.llm-container.collapsed {
+  transform: translateX(calc(100% - 16px));
 }
 
 .llm-panel h3 {
@@ -558,4 +559,12 @@
 
 .llm-panel button:hover {
   opacity: 0.9;
+}
+
+.llm-panel.collapsed {
+  transform: translateX(100%);
+}
+
+.llm-container.collapsed .llm-toggle-btn {
+  transform: translateX(0);
 }

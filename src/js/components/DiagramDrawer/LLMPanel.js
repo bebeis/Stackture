@@ -2,12 +2,21 @@ export class LLMPanel {
   constructor(diagram) {
     this.diagram = diagram;
     this.panel = null;
+    this.toggleButton = null;
+    this.isVisible = true;
     this.init();
   }
 
   init() {
+    // 패널 생성
     this.panel = document.createElement('div');
     this.panel.classList.add('llm-panel');
+    
+    // 토글 버튼은 패널 외부에 별도로 생성
+    this.toggleButton = document.createElement('button');
+    this.toggleButton.classList.add('llm-toggle-btn');
+    this.toggleButton.innerHTML = '◀';
+    this.toggleButton.addEventListener('click', () => this.togglePanel());
     
     const title = document.createElement('h3');
     title.textContent = 'AI 아키텍처 제안';
@@ -32,7 +41,28 @@ export class LLMPanel {
     this.panel.appendChild(generateBtn);
     this.panel.appendChild(applyBtn);
 
-    this.diagram.container.parentElement.appendChild(this.panel);
+    // 패널과 토글 버튼을 컨테이너에 추가
+    const container = document.createElement('div');
+    container.classList.add('llm-container');
+    container.appendChild(this.toggleButton);
+    container.appendChild(this.panel);
+    
+    this.diagram.container.parentElement.appendChild(container);
+  }
+
+  togglePanel() {
+    this.isVisible = !this.isVisible;
+    const container = this.panel.parentElement;
+    
+    if (this.isVisible) {
+      this.panel.classList.remove('collapsed');
+      container.classList.remove('collapsed');
+      this.toggleButton.innerHTML = '◀';
+    } else {
+      this.panel.classList.add('collapsed');
+      container.classList.add('collapsed');
+      this.toggleButton.innerHTML = '▶';
+    }
   }
 
   async generateArchitecture() {
